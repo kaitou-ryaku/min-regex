@@ -3,3 +3,5 @@
 *.d
 *.out
 *.exe
+*.dot
+*.png

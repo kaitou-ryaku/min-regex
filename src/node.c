@@ -240,7 +240,7 @@ extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
     node[i].out_snd      = -1;
   }
 }/*}}}*/
-extern void node_list_to_dot( FILE *fp, NODE *node, const int topic_node, const char* fontsize, const char* width, const char* topic_color, const char* normal_color) {/*{{{*/
+extern void node_list_to_dot( FILE *fp, NODE *node, const int topic_node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
   fprintf( fp, "digraph graphname {\n");
   fprintf( fp, "  graph [rankdir = LR]\n");
 
@@ -260,7 +260,9 @@ extern void node_list_to_dot( FILE *fp, NODE *node, const int topic_node, const 
 
     if (i == topic_node) {
       fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", topic_color,  topic_color);
-    } else {
+    } else if (i == 0 || i == 1){
+      fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", boundary_color, boundary_color);
+    }  else {
       fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", normal_color, normal_color);
     }
 

@@ -24,6 +24,7 @@ void node_list_to_dot(
   , const char* fontsize
   , const char* width
   , const char* topic_color
+  , const char* boundary_color
   , const char* normal_color
 );
 
