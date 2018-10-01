@@ -18,10 +18,10 @@ dot言語を吐いてgraphvizで変換できるようにもした。
 あとvimのC言語用の超軽量スニペットを自作した。
 
 * 正規表現`a(bc|d*e)f`のオートマトン
-[`a(bc|d*e)f`](sample/01.png)
+![`a(bc|d*e)f`](sample/01.png)
 
 * 正規表現`a(b(c|d)|(e|f)g)h`のオートマトン
-[`a(b(c|d)|(e|f)g)h`](sample/02.png)
+![`a(b(c|d)|(e|f)g)h`](sample/02.png)
 
 ### 使い方
 
