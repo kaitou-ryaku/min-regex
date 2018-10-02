@@ -232,45 +232,6 @@ extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
     node[i].out_snd      = -1;
   }
 }/*}}}*/
-extern void node_list_to_dot( FILE *fp, NODE *node, const int topic_node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
-  fprintf( fp, "digraph graphname {\n");
-  fprintf( fp, "  graph [rankdir = LR]\n");
-
-  for (int i=0; i<node[0].total;i ++) {
-    NODE n = node[i];
-    fprintf( fp, "  ");
-    fprintf( fp, "%05d [ "      , i);
-    fprintf( fp, "label=\"%c\", " , n.symbol);
-    fprintf( fp, "fontsize=%s, ", fontsize);
-    fprintf( fp, "width=%s, "   , width);
-
-    if (n.is_magick) {
-      fprintf( fp, "shape=circle, ");
-    } else {
-      fprintf( fp, "shape=square, ");
-    }
-
-    if (i == topic_node) {
-      fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", topic_color,  topic_color);
-    } else if (i == 0 || i == 1){
-      fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", boundary_color, boundary_color);
-    }  else {
-      fprintf( fp, "fontcolor=\"%s\", color=\"%s\"", normal_color, normal_color);
-    }
-
-    fprintf( fp, "]\n");
-  }
-
-  fprintf( fp, "\n");
-
-  for (int i=0; i<node[0].total; i++) {
-    NODE n = node[i];
-    if (n.out_fst >= 0) fprintf( fp, "  %05d -> %05d\n", i, n.out_fst);
-    if (n.out_snd >= 0) fprintf( fp, "  %05d -> %05d\n", i, n.out_snd);
-  }
-
-  fprintf( fp, "}\n");
-}/*}}}*/
 /*}}}*/
 // デバッグ用関数/*{{{*/
 void debug_print_node_list(const NODE *node, const int node_size) {

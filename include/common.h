@@ -16,9 +16,9 @@ typedef struct {
 } NODE;
 
 typedef struct {
-  int step;          // オートマトン遍歴のステップ数。
-  int node_index;    // オートマトンの番号。
-  int symbol_index;  // マッチした文字の添字番号。役文字のノードなら-1。
+  int step;           // オートマトン遍歴のステップ数。つまりこのノードの番号
+  int node_index;     // オートマトンの添字番号。
+  int str_index;      // 文字列の添字番号。
 } MATCH;
 
 #endif
