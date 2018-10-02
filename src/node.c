@@ -95,30 +95,22 @@ void regex_to_node_list(/*{{{*/
     (*node_in) = node_current;
     (*node_empty)++;
 
-    node[node_current+1].symbol       = '*';
-    node[node_current+1].symbol_index = regex_next;
-    node[node_current+1].is_magick    = true;
-    (*node_empty)++;
-
     int tmp_in, tmp_out;
     regex_to_node_list(regex_str, regex_begin, regex_next, node, &tmp_in, &tmp_out, node_empty, node_list_size);
-    node[node_current  ].in_snd  = tmp_out;
-    node[node_current  ].out_fst = node_current+1;
-
-    node[node_current+1].in_fst  = node_current;
-    node[node_current+1].out_snd = tmp_in;
-
-    node[tmp_in ].in_fst         = node_current+1;
+    node[node_current].in_snd  = tmp_out;
+    node[node_current].out_fst = node_current;
+    node[node_current].out_snd = tmp_in;
+    node[tmp_in ].in_fst         = node_current;
     node[tmp_out].out_fst        = node_current;
 
     if (regex_next+1 < regex_end) {
       regex_to_node_list(regex_str, regex_next+1, regex_end, node, &tmp_in, &tmp_out, node_empty, node_list_size);
-      node[node_current+1].out_fst = tmp_in;
-      node[tmp_in].in_fst = node_current+1;
+      node[node_current].out_fst = tmp_in;
+      node[tmp_in].in_fst = node_current;
       (*node_out) = tmp_out;
 
     } else {
-      (*node_out) = node_current+1;
+      (*node_out) = node_current;
     }
 
   // 次の文字が {'*'以外 or 存在しない} で、現在の文字が普通のアルファベットの場合
