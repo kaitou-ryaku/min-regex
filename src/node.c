@@ -113,11 +113,15 @@ void regex_to_node_list(/*{{{*/
       (*node_out) = node_current;
     }
 
-  // 次の文字が {'*'以外 or 存在しない} で、現在の文字が普通のアルファベットの場合
+  // 次の文字が {'*'以外 or 存在しない} で、現在の文字が普通のアルファベットか空文字'@'の場合
   } else if (is_magick(regex_str[regex_begin]) == false){
     node[node_current].symbol       = current_char;
     node[node_current].symbol_index = regex_begin;
-    node[node_current].is_magick    = false;
+    if (current_char == '@') {
+      node[node_current].is_magick    = true;
+    } else {
+      node[node_current].is_magick    = false;
+    }
     (*node_in) = node_current;
     (*node_empty)++;
 
