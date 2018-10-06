@@ -54,21 +54,31 @@ void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int*
 
   // 役文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
   if (n.is_magick) {
+    // 文字列が減らないまま再訪したかチェック
+    bool revisit_without_decrease = false;
+    for (int i=0; i<(*step)-1; i++) {
+      const MATCH tmp_m = match[i];
+      if (tmp_m.str_index == (*seek) && tmp_m.node_index == m.node_index) {
+        revisit_without_decrease = true;
+        break;
+      }
+    }
 
     // 初めてこのノードを訪問 -> fstに行く
-    if (!is_back) {
+    if ((!revisit_without_decrease) && (!is_back)) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_fst;
       match_str( str, seek, node, match, step, match_list_size, false);
 
     // バックトラックで訪問、fst のみ探索済みかつ、snd が空でない -> sndに行く
-    } else if (n.out_fst == match[(*step)+1].node_index && n.out_snd >= 0) {
+    } else if ((!revisit_without_decrease) && (n.out_fst == match[(*step)+1].node_index) && (n.out_snd >= 0)) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_snd;
       match_str( str, seek, node, match, step, match_list_size, false);
 
+    // 文字列が減らないまま再訪問                         -> バックトラック
     // バックトラックで訪問、fst のみ探索済みで、snd が空 -> 更にバックトラック
     // バックトラックで訪問、fst, snd 共に探索済み        -> 更にバックトラック
     } else {
