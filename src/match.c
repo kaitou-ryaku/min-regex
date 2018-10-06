@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "../include/print.h"
-int hoge=0;
+int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
 void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
 int find_back_node(const NODE* node, const MATCH* match, const int step);
@@ -11,6 +11,7 @@ int find_back_node(const NODE* node, const MATCH* match, const int step);
 // デバッグ用プロトタイプ/*{{{*/
 void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step);
 void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back);
+void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
 // 関数本体/*{{{*/
 extern void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
@@ -34,16 +35,7 @@ extern int match_all_str( const char* str, const NODE* node, MATCH *match, const
 }/*}}}*/
 void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
   // 一時的に画像を書き出し
-  hoge++;
-  char filename[100];
-  sprintf(filename, "graph%05d.dot", hoge);
-  FILE *file = fopen(filename, "w");
-  fprintf( file, "digraph graphname {\n");
-  fprintf( file, "  graph [rankdir = LR]\n");
-  node_match_list_to_dot_inside( file, hoge, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, (*step));
-  fprintf( file, "}\n");
-  fclose(file);
-
+  debug_print_match_str_dot(node, match, *(step));
   debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
   debug_print_match_list(match,  node,  str, (*step)+1);
   assert((*step) < match_list_size);
@@ -132,5 +124,17 @@ void debug_print_match_str_args(const char* str, const int* seek, const NODE* no
   if ((*seek) == -1) c = ' ';
   else               c = str[(*seek)];
   fprintf(stderr, "\n--- %c %3d %3d %s ---\n", c, (*seek), (*step), is_back?"back":"forward");
+}
+void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step) {
+  // 一時的に画像を書き出し
+  debug_id++;
+  char filename[100];
+  sprintf(filename, "graph%05d.dot", debug_id);
+  FILE *file = fopen(filename, "w");
+  fprintf( file, "digraph graphname {\n");
+  fprintf( file, "  graph [rankdir = LR]\n");
+  node_match_list_to_dot_inside( file, debug_id, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, step);
+  fprintf( file, "}\n");
+  fclose(file);
 }
 /*}}}*/
