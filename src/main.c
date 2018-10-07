@@ -14,12 +14,13 @@ int main(void) {
   // const char *original_regex = "a((b*|c)|d)*e";
   // const char *original_regex = "a(@|b)*c";
   // const char *original_regex = "a\\(b\\)c";
-  const char *original_regex = "a(b|c|d|e)f";
+  const char *original_regex = "a(b|c\\|d|e)f";
 
   char simple_regex[200];
   int current = 0;
   simplify_regex( original_regex, 0, strlen(original_regex), simple_regex, &current, 200);
   simple_regex[current] = '\0';
+  fprintf(stderr, "%s\n", simple_regex);
 
   NODE node[100];
   initialize_node(node, 100);

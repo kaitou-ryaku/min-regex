@@ -192,6 +192,10 @@ static int search_corresponding_paren(const char* s, const int i, const int end)
   assert(s[i]=='(');
   int j=i, count=0;
   while(j < end) {
+    if (s[j] == '\\') {
+      j=j+2;
+      continue;
+    }
     if (s[j] == '(') count++;
     if (s[j] == ')') count--;
     if (count == 0) break;
@@ -205,6 +209,10 @@ static int search_inner_letter(const char* s, const int i, const char c, const i
   assert((s[i]=='(') || (s[i]==c));
   int j=i+1, count=0;
   while(j < end) {
+    if (s[j] == '\\') {
+      j=j+2;
+      continue;
+    }
     if (s[j] == '(') count++;
     if (s[j] == ')') count--;
     if (count == 0 && s[j] == c) break;
