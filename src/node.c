@@ -202,12 +202,12 @@ int search_corresponding_paren(const char* s, const int i, const int end) {/*{{{
   else return -1;
 }/*}}}*/
 int search_inner_letter(const char* s, const int i, const char c, const int end) {/*{{{*/
-  assert(s[i]=='(');
-  int j=i, count=0;
+  assert((s[i]=='(') || (s[i]==c));
+  int j=i+1, count=0;
   while(j < end) {
     if (s[j] == '(') count++;
     if (s[j] == ')') count--;
-    if (count == 1 && s[j] == c) break;
+    if (count == 0 && s[j] == c) break;
     j++;
   }
 
@@ -245,6 +245,68 @@ extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
     node[i].in_snd       = -1;
     node[i].out_fst      = -1;
     node[i].out_snd      = -1;
+  }
+}/*}}}*/
+extern void simplify_regex( const char* original_regex, const int begin, const int end, char *simple_regex, int* current, const int size) {/*{{{*/
+  const char c = original_regex[begin];
+  if (c == '(') {
+    // (a|b|c|d) --> (a|(b|(c|d)))
+
+    // (a| -> (a|
+    int pipe = search_inner_letter(original_regex, begin, '|', end);
+    assert(pipe > 0);
+    simple_regex[(*current)] = '(';
+    (*current)++;
+    simplify_regex(original_regex, begin+1, pipe, simple_regex, current ,size);
+    simple_regex[(*current)] = '|';
+    (*current)++;
+
+    // |b| -> (b|
+    int next_pipe = search_inner_letter(original_regex, pipe, '|', end);
+    while (next_pipe > 0) {
+      assert(pipe+1 < next_pipe);
+      simple_regex[(*current)] = '(';
+      (*current)++;
+      simplify_regex(original_regex, pipe+1, next_pipe, simple_regex, current ,size);
+      simple_regex[(*current)] = '|';
+      (*current)++;
+      pipe      = next_pipe;
+      next_pipe = search_inner_letter(original_regex, next_pipe, '|', end);
+    }
+
+    // |d) -> d
+    const int end_pipe = search_corresponding_paren(original_regex, begin, end);
+    simplify_regex(original_regex, pipe+1, end_pipe, simple_regex, current ,size);
+
+    // 最後に'|'の数だけ')'を書きまくる
+    pipe = search_inner_letter(original_regex, begin, '|', end);
+    while (pipe > 0) {
+      simple_regex[(*current)] = ')';
+      (*current)++;
+      pipe = search_inner_letter(original_regex, pipe, '|', end);
+    }
+
+    // 分岐の続き
+    if (end_pipe+1 < end) {
+      simplify_regex( original_regex, end_pipe+1, end, simple_regex, current ,size);
+    }
+
+  } else if (c == '\\') {
+    // エスケープシーケンス
+    simple_regex[(*current)  ] = '\\';
+    simple_regex[(*current)+1] = original_regex[begin+1];
+    (*current) = (*current) + 2;
+    if (begin+2 < end) {
+      simplify_regex( original_regex, begin+2, end, simple_regex, current ,size);
+    }
+
+  } else {
+    // 処理の不要な普通の文字
+    simple_regex[(*current)] = c;
+    (*current)++;
+    if (begin+1 < end) {
+      simplify_regex( original_regex, begin+1, end, simple_regex, current ,size);
+    }
   }
 }/*}}}*/
 /*}}}*/
