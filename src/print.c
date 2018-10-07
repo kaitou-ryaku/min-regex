@@ -4,10 +4,10 @@
 #include "../include/match.h"
 
 // 関数プロトタイプ/*{{{*/
-void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color);
+static void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color);
 /*}}}*/
 // 関数本体/*{{{*/
-void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
+static void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
   for (int i=0; i<node[0].total;i ++) {
     NODE n = node[i];
     fprintf( fp, "  ");

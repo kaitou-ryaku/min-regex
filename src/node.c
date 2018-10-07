@@ -5,7 +5,7 @@
 #include <assert.h>
 
 // 関数プロトタイプ/*{{{*/
-void regex_to_node_list(
+static void regex_to_node_list(
   const char* regex_str
   , const int regex_begin
   , const int regex_end
@@ -15,14 +15,14 @@ void regex_to_node_list(
   , int*      node_empty
   , const int node_list_size
 );
-int search_corresponding_paren(const char* s, const int i, const int end);
-int search_inner_letter(const char* s, const int i, const char c, const int end);
-int search_next_char_index(const char *s, const int i, const int end);
-bool is_magick(const char c);
+static int search_corresponding_paren(const char* s, const int i, const int end);
+static int search_inner_letter(const char* s, const int i, const char c, const int end);
+static int search_next_char_index(const char *s, const int i, const int end);
+static bool is_magick(const char c);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
-void debug_print_node_list(const NODE *node, const int node_size);
-void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty);
+static void debug_print_node_list(const NODE *node, const int node_size);
+static void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty);
 /*}}}*/
 // 関数本体/*{{{*/
 extern void regex_to_all_node(/*{{{*/
@@ -68,7 +68,7 @@ extern void regex_to_all_node(/*{{{*/
     node[i].total = node_empty;
   }
 }/*}}}*/
-void regex_to_node_list(/*{{{*/
+static void regex_to_node_list(/*{{{*/
   const char* regex_str
   , const int regex_begin
   , const int regex_end
@@ -188,7 +188,7 @@ void regex_to_node_list(/*{{{*/
   }
 
 }/*}}}*/
-int search_corresponding_paren(const char* s, const int i, const int end) {/*{{{*/
+static int search_corresponding_paren(const char* s, const int i, const int end) {/*{{{*/
   assert(s[i]=='(');
   int j=i, count=0;
   while(j < end) {
@@ -201,7 +201,7 @@ int search_corresponding_paren(const char* s, const int i, const int end) {/*{{{
   if (count == 0) return j;
   else return -1;
 }/*}}}*/
-int search_inner_letter(const char* s, const int i, const char c, const int end) {/*{{{*/
+static int search_inner_letter(const char* s, const int i, const char c, const int end) {/*{{{*/
   assert((s[i]=='(') || (s[i]==c));
   int j=i+1, count=0;
   while(j < end) {
@@ -214,7 +214,7 @@ int search_inner_letter(const char* s, const int i, const char c, const int end)
   if (s[j] == c) return j;
   else return -1;
 }/*}}}*/
-int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
+static int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
   if (i >= end-1) return -1;
 
   if (s[i] == '(') {
@@ -230,7 +230,7 @@ int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
     assert(0);
   }
 }/*}}}*/
-bool is_magick(const char c) {/*{{{*/
+static bool is_magick(const char c) {/*{{{*/
   if ((c == '(') | (c == '|') | (c == ')') | (c == '*')) return true;
   else return false;
 }/*}}}*/
@@ -311,14 +311,14 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
 }/*}}}*/
 /*}}}*/
 // デバッグ用関数/*{{{*/
-void debug_print_node_list(const NODE *node, const int node_size) {
+static void debug_print_node_list(const NODE *node, const int node_size) {
   for (int i=0; i<node_size; i++) {
     NODE n = node[i];
     fprintf(stderr, "%3d %3d %c %3d %3d  %3d %3d  %3d %3d\n", i, node_size, n.symbol, n.symbol_index, n.is_magick, n.in_fst, n.in_snd, n.out_fst, n.out_snd);
   }
 }
 
-void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty) {
+static void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty) {
   fprintf(stderr, "regex_begin:%3d[%c] regex_end:%3d[%c:%c] regex_next:%d[%c] node_empty=node_current:%d \n", regex_begin, regex_str[regex_begin], regex_end, regex_str[regex_end-1], (regex_str[regex_end]=='\0')?'N':regex_str[regex_end], regex_next, (regex_next == -1)?'-':regex_str[regex_next], node_empty);
 }
 /*}}}*/

@@ -3,15 +3,15 @@
 #include <string.h>
 #include <assert.h>
 #include "../include/print.h"
-int debug_id=0;
+static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
-void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
-int find_back_node(const NODE* node, const MATCH* match, const int step);
+static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
+static int find_back_node(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
-void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step);
-void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back);
-void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step);
+static void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step);
+static void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back);
+static void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
 // 関数本体/*{{{*/
 extern void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
@@ -33,7 +33,7 @@ extern int match_all_str( const char* str, const NODE* node, MATCH *match, const
 
   return step;
 }/*}}}*/
-void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
+static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
   // 一時的に画像を書き出し
   debug_print_match_str_dot(node, match, *(step));
   debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
@@ -107,7 +107,7 @@ void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int*
 
   }
 }/*}}}*/
-int find_back_node(const NODE* node, const MATCH* match, const int step) {/*{{{*/
+static int find_back_node(const NODE* node, const MATCH* match, const int step) {/*{{{*/
   int delta = 1;
   while (delta < step) {
     const NODE back_node  = node[match[step-delta].node_index];
@@ -118,7 +118,7 @@ int find_back_node(const NODE* node, const MATCH* match, const int step) {/*{{{*
 }/*}}}*/
 /*}}}*/
 // デバッグ用関数本体/*{{{*/
-void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step) {/*{{{*/
+static void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step) {/*{{{*/
   for (int i=0; i<total_step; i++) {
     MATCH m = match[i];
     NODE  n = node[match[i].node_index];
@@ -129,13 +129,13 @@ void debug_print_match_list(const MATCH *match, const NODE* node, const char* st
   }
 }/*}}}*/
 
-void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back) {
+static void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back) {
   char c;
   if ((*seek) == -1) c = ' ';
   else               c = str[(*seek)];
   fprintf(stderr, "\n--- %c %3d %3d %s ---\n", c, (*seek), (*step), is_back?"back":"forward");
 }
-void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step) {
+static void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step) {
   // 一時的に画像を書き出し
   debug_id++;
   char filename[100];
