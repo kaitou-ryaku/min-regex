@@ -115,19 +115,30 @@ void regex_to_node_list(/*{{{*/
 
   // 次の文字が {'*'以外 or 存在しない} で、現在の文字が普通のアルファベットか空文字'@'の場合
   } else if (is_magick(regex_str[regex_begin]) == false){
-    node[node_current].symbol       = current_char;
-    node[node_current].symbol_index = regex_begin;
+    int regex_begin_next = regex_begin+1;
     if (current_char == '@') {
+      node[node_current].symbol       = current_char;
+      node[node_current].symbol_index = regex_begin;
       node[node_current].is_magick    = true;
+    } else if (current_char == '\\') {
+      assert(regex_begin_next < regex_end);
+      const char next_char = regex_str[regex_begin+1];
+      assert((next_char == '\\') || (next_char == '(') || (next_char == '|') || (next_char == ')') || (next_char == '*') || (next_char == '@'));
+      node[node_current].symbol       = next_char;
+      node[node_current].symbol_index = regex_begin+1;
+      regex_begin_next++;
+      node[node_current].is_magick    = false;
     } else {
+      node[node_current].symbol       = current_char;
+      node[node_current].symbol_index = regex_begin;
       node[node_current].is_magick    = false;
     }
     (*node_in) = node_current;
     (*node_empty)++;
 
-    if (regex_begin+1 < regex_end) {
+    if (regex_begin_next < regex_end) {
       int tmp_in, tmp_out;
-      regex_to_node_list(regex_str, regex_begin+1, regex_end, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+      regex_to_node_list(regex_str, regex_begin_next, regex_end, node, &tmp_in, &tmp_out, node_empty, node_list_size);
       node[node_current].out_fst = tmp_in;
       node[tmp_in].in_fst = node_current;
       (*node_out) = tmp_out;

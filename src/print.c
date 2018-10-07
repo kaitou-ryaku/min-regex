@@ -12,7 +12,11 @@ void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, co
     NODE n = node[i];
     fprintf( fp, "  ");
     fprintf( fp, "%05d%05d [ "      , graph_id, i);
-    fprintf( fp, "label=\"%c\", " , n.symbol);
+    if (n.symbol == '\\') {
+      fprintf( fp, "label=\"\\\\\", ");
+    } else {
+      fprintf( fp, "label=\"%c\", " , n.symbol);
+    }
     fprintf( fp, "fontsize=%s, ", fontsize);
     fprintf( fp, "width=%s, "   , width);
 

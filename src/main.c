@@ -11,7 +11,9 @@ int main(void) {
   // const char *regex_str = "a((bc*d(e|f*g)*|hi*j)|kl*m)*no*p";
   // const char *regex_str = "a((b|c)d|(e|f)g)h";
   // const char *regex_str = "a((b*|c)|d)*e";
-  const char *regex_str = "a(@|b)*c";
+  // const char *regex_str = "a(@|b)*c";
+  // const char *regex_str = "a\\(b\\)c";
+  const char *regex_str = "a\\\\c";
 
   NODE node[100];
   initialize_node(node, 100);
@@ -22,7 +24,7 @@ int main(void) {
 
   MATCH match[50];
   initialize_match(match, 50);
-  const int step = match_all_str( "abbc", node, match, 50);
+  const int step = match_all_str( "a\\c", node, match, 50);
 
   node_match_list_to_dot( stdout, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, step);
 
