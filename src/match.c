@@ -35,9 +35,9 @@ extern int match_all_str( const char* str, const NODE* node, MATCH *match, const
 }/*}}}*/
 static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
   // 一時的に画像を書き出し
-  debug_print_match_str_dot(node, match, *(step));
-  debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
-  debug_print_match_list(match,  node,  str, (*step)+1);
+  // debug_print_match_str_dot(node, match, *(step));
+  // debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
+  // debug_print_match_list(match,  node,  str, (*step)+1);
   assert((*step) < match_list_size);
   if (is_back && ((*step) == 0)) return;
   if ((*seek) == strlen(str)) return;

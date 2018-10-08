@@ -84,8 +84,8 @@ static void regex_to_node_list(/*{{{*/
   const int node_current = *node_empty;
   const int regex_next = search_next_char_index(regex_str, regex_begin, regex_end);
 
-  debug_print_node_list(node, *node_empty);
-  debug_print_regex_to_node_list_args(regex_str, regex_begin, regex_end, regex_next, *node_empty);
+  // debug_print_node_list(node, *node_empty);
+  // debug_print_regex_to_node_list_args(regex_str, regex_begin, regex_end, regex_next, *node_empty);
 
   // 次の文字*が存在する場合
   if ((regex_next > 0) && (regex_str[regex_next] == '*')) {
@@ -150,7 +150,6 @@ static void regex_to_node_list(/*{{{*/
 
   // 次の文字が {'*'以外 or 存在しない} で、現在の文字が(の場合
   } else if (regex_str[regex_begin] == '(') {
-    fprintf(stderr, "regex_begin:%d regex_next:%d regex_end:%d\n", regex_begin, regex_next, regex_end);
     node[node_current  ].symbol       = '(';
     node[node_current  ].symbol_index = regex_begin;
     node[node_current  ].is_magick    = true;
@@ -244,7 +243,6 @@ static int search_inner_letter(const char* s, const int i, const char c, const i
   else return -1;
 }/*}}}*/
 static int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
-  fprintf(stderr, "%d%c %d%c\n",i, s[i], end-1, s[end-1]);
   if (i >= end-1) return -1;
 
   if (s[i] == '(') {
