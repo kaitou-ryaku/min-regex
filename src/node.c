@@ -150,6 +150,7 @@ static void regex_to_node_list(/*{{{*/
 
   // 次の文字が {'*'以外 or 存在しない} で、現在の文字が(の場合
   } else if (regex_str[regex_begin] == '(') {
+    fprintf(stderr, "regex_begin:%d regex_next:%d regex_end:%d\n", regex_begin, regex_next, regex_end);
     node[node_current  ].symbol       = '(';
     node[node_current  ].symbol_index = regex_begin;
     node[node_current  ].is_magick    = true;
@@ -157,32 +158,52 @@ static void regex_to_node_list(/*{{{*/
     (*node_empty)++;
 
     node[node_current+1].symbol       = ')';
-    node[node_current+1].symbol_index = regex_next-1;
+
+    // ')'の後続がある場合
+    if (0 < regex_next) {
+      node[node_current+1].symbol_index = regex_next-1;
+
+    // ')'の後続がない場合
+    } else {
+      node[node_current+1].symbol_index = regex_end-1;
+    }
+
     node[node_current+1].is_magick    = true;
     (*node_out) = node_current+1;
     (*node_empty)++;
 
     const int regex_pipe = search_inner_letter(regex_str, regex_begin, '|', regex_end);
     int tmp_in, tmp_out;
+
+    // (...|の処理
     regex_to_node_list(regex_str, regex_begin+1, regex_pipe, node, &tmp_in, &tmp_out, node_empty, node_list_size);
     node[node_current  ].out_fst = tmp_in;
     node[node_current+1].in_fst  = tmp_out;
     node[tmp_in].in_fst          = node_current;
     node[tmp_out].out_fst        = node_current+1;
 
-    regex_to_node_list(regex_str, regex_pipe+1, regex_next-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
-    node[node_current  ].out_snd = tmp_in;
-    node[node_current+1].in_snd  = tmp_out;
-    node[tmp_in].in_fst          = node_current;
-    node[tmp_out].out_fst        = node_current+1;
+    if (0 < regex_next) {
+      // ')'の後続がある場合の|...)の処理
+      regex_to_node_list(regex_str, regex_pipe+1, regex_next-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+      node[node_current  ].out_snd = tmp_in;
+      node[node_current+1].in_snd  = tmp_out;
+      node[tmp_in].in_fst          = node_current;
+      node[tmp_out].out_fst        = node_current+1;
 
-    if (regex_next > 0) {
+      // )...の処理
       regex_to_node_list(regex_str, regex_next, regex_end, node, &tmp_in, &tmp_out, node_empty, node_list_size);
       node[node_current+1].out_fst = tmp_in;
       node[tmp_in].in_fst = node_current+1;
       (*node_out) = tmp_out;
 
+    // ')'の後続がない場合|...)の処理
     } else {
+      regex_to_node_list(regex_str, regex_pipe+1, regex_end-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+      node[node_current  ].out_snd = tmp_in;
+      node[node_current+1].in_snd  = tmp_out;
+      node[tmp_in].in_fst          = node_current;
+      node[tmp_out].out_fst        = node_current+1;
+
       (*node_out) = node_current+1;
     }
   }
@@ -223,6 +244,7 @@ static int search_inner_letter(const char* s, const int i, const char c, const i
   else return -1;
 }/*}}}*/
 static int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
+  fprintf(stderr, "%d%c %d%c\n",i, s[i], end-1, s[end-1]);
   if (i >= end-1) return -1;
 
   if (s[i] == '(') {
