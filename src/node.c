@@ -283,7 +283,8 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     // (a|b|c|d) --> (a|(b|(c|d)))
 
     // (a| -> (a|
-    int pipe = search_inner_letter(original_regex, begin, '|', end);
+    const int end_pipe = search_corresponding_paren(original_regex, begin, end);
+    int pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
     assert(pipe > 0);
     simple_regex[(*current)] = '(';
     (*current)++;
@@ -292,7 +293,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     (*current)++;
 
     // |b| -> (b|
-    int next_pipe = search_inner_letter(original_regex, pipe, '|', end);
+    int next_pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
     while (next_pipe > 0) {
       assert(pipe+1 < next_pipe);
       simple_regex[(*current)] = '(';
@@ -301,19 +302,18 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
       simple_regex[(*current)] = '|';
       (*current)++;
       pipe      = next_pipe;
-      next_pipe = search_inner_letter(original_regex, next_pipe, '|', end);
+      next_pipe = search_inner_letter(original_regex, next_pipe, '|', end_pipe);
     }
 
     // |d) -> d
-    const int end_pipe = search_corresponding_paren(original_regex, begin, end);
     simplify_regex(original_regex, pipe+1, end_pipe, simple_regex, current ,size);
 
     // 最後に'|'の数だけ')'を書きまくる
-    pipe = search_inner_letter(original_regex, begin, '|', end);
+    pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
     while (pipe > 0) {
       simple_regex[(*current)] = ')';
       (*current)++;
-      pipe = search_inner_letter(original_regex, pipe, '|', end);
+      pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
     }
 
     // 分岐の続き
