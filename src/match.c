@@ -40,7 +40,6 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
   // debug_print_match_list(match,  node,  str, (*step)+1);
   assert((*step) < match_list_size);
   if (is_back && ((*step) == 0)) return;
-  if ((*seek) == strlen(str)) return;
 
   // バックトラックでは、今までのステップ中に含まれる最近の役文字に移動する。
   // その役文字へ来訪様式の違いと、次回ステップの関係は
@@ -64,19 +63,25 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
       }
     }
 
-    // 初めてこのノードを訪問 -> fstに行く
-    if ((!revisit_without_decrease) && (!is_back)) {
+    // グラフが$でない、初めてこのノードを訪問 -> fstに行く
+    if ((n.symbol != '$') && (!revisit_without_decrease) && (!is_back)) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_fst;
       match_str( str, seek, node, match, step, match_list_size, false);
 
-    // バックトラックで訪問、fst のみ探索済みかつ、snd が空でない -> sndに行く
-    } else if ((!revisit_without_decrease) && (n.out_fst == match[(*step)+1].node_index) && (n.out_snd >= 0)) {
+    // グラフが$でない、バックトラックで訪問、fst のみ探索済みかつ、snd が空でない -> sndに行く
+    } else if ((n.symbol != '$') && (!revisit_without_decrease) && (n.out_fst == match[(*step)+1].node_index) && (n.out_snd >= 0)) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_snd;
       match_str( str, seek, node, match, step, match_list_size, false);
+
+    // グラフが$で、比較文字が文字が残ってない -> 終了
+    } else if ((n.symbol == '$') && ((*seek) == strlen(str))) {
+      match[(*step)].str_index  = -1;
+      match[(*step)].str_index  = 1;
+      (*step)++;
 
     // 文字列が減らないまま再訪問                         -> バックトラック
     // バックトラックで訪問、fst のみ探索済みで、snd が空 -> 更にバックトラック

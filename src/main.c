@@ -45,8 +45,11 @@ int main(int argc, const char **argv) {
   initialize_match(match, 50);
   const int step = match_all_str(match_str, node, match, 50);
 
-  // マッチ結果をdotファイルに書き出し
-  {
+  // マッチ成功
+  if (step > 0) {
+    fprintf(stderr, "match\n");
+
+    // マッチの様子をファイルに書き出し
     FILE *fp;
     char *filename = "match.dot";
     if ((fp = fopen(filename, "w")) == NULL) {
@@ -54,11 +57,8 @@ int main(int argc, const char **argv) {
     }
     node_match_list_to_dot(fp, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, step);
     fclose(fp);
-  }
 
-  // マッチの成否を表示
-  if (step > 0) {
-    fprintf(stderr, "match\n");
+  // マッチ失敗
   } else {
     fprintf(stderr, "unmatch\n");
   }
