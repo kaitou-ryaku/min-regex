@@ -73,7 +73,7 @@ extern void node_match_list_to_dot( FILE *fp, const NODE *node, const char* font
   fprintf( fp, "  graph [rankdir = LR]\n");
 
   for (int i=0; i<step; i++) {
-    node_match_list_to_dot_inside( stdout, step-i, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, step-i);
+    node_match_list_to_dot_inside( fp, step-i, node, "12.0", "0.2", "#FF0000", "#FF0000", "#000000", match, step-i);
   }
 
   fprintf( fp, "}\n");
