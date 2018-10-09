@@ -62,11 +62,11 @@ extern void node_match_list_to_dot_inside( FILE *fp, const int graph_id, const N
 
   node_list_to_dot_inside( fp, graph_id, node, topic_node_list, fontsize, width, topic_color, boundary_color, normal_color);
 
-  //fprintf( fp, "\n  GRAPH%05d [ label=\"", graph_id);
-  //for (int i=0; i<step; i++) {
-  //  fprintf( fp, "%c", node[match[i].node_index].symbol);
-  //}
-  //fprintf( fp, "\", shape=none]\n");
+  fprintf( fp, "\n  GRAPH%05d [ label=\"", graph_id);
+  for (int i=0; i<step; i++) {
+    fprintf( fp, "%c", node[match[i].node_index].symbol);
+  }
+  fprintf( fp, "\", shape=none]\n");
 }/*}}}*/
 extern void node_match_list_to_dot( FILE *fp, const NODE *node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color, const MATCH *match, const int step) {/*{{{*/
   fprintf( fp, "digraph graphname {\n");
