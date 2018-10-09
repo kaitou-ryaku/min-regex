@@ -36,6 +36,13 @@ extern void node_match_list_to_dot_inside(
   , const char*  boundary_color
   , const char*  normal_color
   , const MATCH* match
-  , const int
-step);
+  , const int step
+);
+
+extern void print_match_list(
+  FILE*          fp
+  , const NODE*  node
+  , const MATCH* match
+  , const int    step
+);
 #endif

@@ -13,14 +13,14 @@ int main(int argc, const char **argv) {
   }
   const char  *regex_str = argv[1];
   const char  *match_str = argv[2];
-  fprintf(stderr, "regex   : %s\n", regex_str);
+  fprintf(stderr, "regex    : %s\n", regex_str);
 
   // 正規表現を簡約
   char simple_regex[200];
   int current = 0;
   simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
   simple_regex[current] = '\0';
-  fprintf(stderr, "process : %s\n", simple_regex);
+  fprintf(stderr, "simplify : %s\n", simple_regex);
 
   // 簡約された正規表現をオートマトンに変換
   NODE node[100];
@@ -40,14 +40,16 @@ int main(int argc, const char **argv) {
   }
 
   // オートマトンと比較文字列をマッチング
-  fprintf(stderr, "compare : %s\n", match_str);
+  fprintf(stderr, "compare  : %s\n", match_str);
   MATCH match[50];
   initialize_match(match, 50);
   const int step = match_all_str(match_str, node, match, 50);
 
   // マッチ成功
   if (step > 0) {
-    fprintf(stderr, "match\n");
+    fprintf(stderr, "match    : ");
+    print_match_list(stderr, node, match, step);
+    fprintf(stderr, "\n");
 
     // マッチの様子をファイルに書き出し
     FILE *fp;
