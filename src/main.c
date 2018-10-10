@@ -65,5 +65,8 @@ int main(int argc, const char **argv) {
     fprintf(stderr, "unmatch\n");
   }
 
+  int (*hoge)(int) = (int (*)(int)) __static_node_func__("hoge");
+  fprintf(stderr, "hoge%dhoge\n", hoge(3));
+
   return 0;
 }

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#define __REGISTER_STATIC_FUNCTION__(x) do {if (strcmp(func_name, #x) == 0) return (void (*)(void)) x;} while(0)
+
 // 関数プロトタイプ/*{{{*/
 static void regex_to_node_list(
   const char* regex_str
@@ -350,3 +352,20 @@ static void debug_print_regex_to_node_list_args(const char* regex_str, const int
   fprintf(stderr, "regex_begin:%3d[%c] regex_end:%3d[%c:%c] regex_next:%d[%c] node_empty=node_current:%d \n", regex_begin, regex_str[regex_begin], regex_end, regex_str[regex_end-1], (regex_str[regex_end]=='\0')?'N':regex_str[regex_end], regex_next, (regex_next == -1)?'-':regex_str[regex_next], node_empty);
 }
 /*}}}*/
+// static関数の密輸関数/*{{{*/
+static int hoge(int a);
+static int hoge(int a) {
+  return a+2;
+}
+extern void (*__static_node_func__(const char *func_name)) (void) {
+  __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
+  __REGISTER_STATIC_FUNCTION__(regex_to_node_list);
+  __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
+  __REGISTER_STATIC_FUNCTION__(search_inner_letter);
+  __REGISTER_STATIC_FUNCTION__(search_next_char_index);
+  __REGISTER_STATIC_FUNCTION__(is_magick);
+  __REGISTER_STATIC_FUNCTION__(debug_print_node_list);
+  __REGISTER_STATIC_FUNCTION__(debug_print_regex_to_node_list_args);
+  __REGISTER_STATIC_FUNCTION__(hoge);
+  return NULL;
+}/*}}}*/
