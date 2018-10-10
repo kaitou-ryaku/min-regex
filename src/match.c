@@ -3,6 +3,9 @@
 #include <string.h>
 #include <assert.h>
 #include "../include/print.h"
+
+#define __REGISTER_STATIC_FUNCTION__(x) do {if (strcmp(func_name, #x) == 0) return (void (*)(void)) x;} while(0)
+
 static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
 static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
@@ -153,3 +156,9 @@ static void debug_print_match_str_dot(const NODE* node, const MATCH* match, cons
   fclose(file);
 }
 /*}}}*/
+// static関数の密輸関数/*{{{*/
+extern void (*__static_match_func__(const char *func_name)) (void) {
+  __REGISTER_STATIC_FUNCTION__(match_str);
+  __REGISTER_STATIC_FUNCTION__(find_back_node);
+  return NULL;
+}/*}}}*/

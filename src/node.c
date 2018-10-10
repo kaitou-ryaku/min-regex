@@ -353,10 +353,6 @@ static void debug_print_regex_to_node_list_args(const char* regex_str, const int
 }
 /*}}}*/
 // static関数の密輸関数/*{{{*/
-static int hoge(int a);
-static int hoge(int a) {
-  return a+2;
-}
 extern void (*__static_node_func__(const char *func_name)) (void) {
   __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
   __REGISTER_STATIC_FUNCTION__(regex_to_node_list);
@@ -366,6 +362,5 @@ extern void (*__static_node_func__(const char *func_name)) (void) {
   __REGISTER_STATIC_FUNCTION__(is_magick);
   __REGISTER_STATIC_FUNCTION__(debug_print_node_list);
   __REGISTER_STATIC_FUNCTION__(debug_print_regex_to_node_list_args);
-  __REGISTER_STATIC_FUNCTION__(hoge);
   return NULL;
 }/*}}}*/
