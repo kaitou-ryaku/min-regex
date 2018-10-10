@@ -160,5 +160,8 @@ static void debug_print_match_str_dot(const NODE* node, const MATCH* match, cons
 extern void (*__static_match_func__(const char *func_name)) (void) {
   __REGISTER_STATIC_FUNCTION__(match_str);
   __REGISTER_STATIC_FUNCTION__(find_back_node);
+  __REGISTER_STATIC_FUNCTION__(debug_print_match_list);
+  __REGISTER_STATIC_FUNCTION__(debug_print_match_str_args);
+  __REGISTER_STATIC_FUNCTION__(debug_print_match_str_dot);
   return NULL;
 }/*}}}*/
