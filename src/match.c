@@ -99,7 +99,7 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
   } else {
 
     // マッチ成功 -> 次のノードに行く
-    if (str[(*seek)] == n.symbol || '.' == n.symbol) {
+    if (str[(*seek)] == n.symbol) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       (*seek)++;

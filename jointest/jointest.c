@@ -49,72 +49,40 @@ static void is_valid(const char* regex_str, const char* match_str, const bool an
 int main(void) {
   is_valid(""       , ""           , false);
   is_valid("@"      , ""           , true );
-  is_valid("."      , ""           , false);
   is_valid("a"      , ""           , false);
   is_valid("(@|@)"  , ""           , true );
-  is_valid("(.|@)"  , ""           , true );
-  is_valid("(@|.)"  , ""           , true );
-  is_valid("(.|.)"  , ""           , false);
   is_valid("(a|@)"  , ""           , true );
   is_valid("(@|a)"  , ""           , true );
   is_valid("(a|a)"  , ""           , false);
-  is_valid("(.|a)"  , ""           , false);
-  is_valid("(a|.)"  , ""           , false);
 
   is_valid("@*"     , ""           , true );
-  is_valid(".*"     , ""           , false);
-  is_valid("a*"     , ""           , false);
+  is_valid("a*"     , ""           , true );
   is_valid("(@|@)*" , ""           , true );
-  is_valid("(.|@)*" , ""           , true );
-  is_valid("(@|.)*" , ""           , true );
-  is_valid("(.|.)*" , ""           , false);
   is_valid("(a|@)*" , ""           , true );
   is_valid("(@|a)*" , ""           , true );
-  is_valid("(a|a)*" , ""           , false);
-  is_valid("(.|a)*" , ""           , false);
-  is_valid("(a|.)*" , ""           , false);
+  is_valid("(a|a)*" , ""           , true );
 
   is_valid("@@"     , ""           , true );
-  is_valid("@."     , ""           , false);
-  is_valid(".@"     , ""           , false);
   is_valid("@a"     , ""           , false);
   is_valid("a@"     , ""           , false);
-  is_valid(".a"     , ""           , false);
-  is_valid("a."     , ""           , false);
-  is_valid(".."     , ""           , false);
   is_valid("aa"     , ""           , false);
   is_valid("ab"     , ""           , false);
 
   is_valid("@*@"    , ""           , true );
-  is_valid("@*."    , ""           , false);
-  is_valid(".*@"    , ""           , true );
   is_valid("@*a"    , ""           , false);
   is_valid("a*@"    , ""           , true );
-  //is_valid(".*a"    , ""           , false);
-  is_valid("a*."    , ""           , false);
-  //is_valid(".*."    , ""           , false);
   is_valid("a*a"    , ""           , false);
   is_valid("a*b"    , ""           , false);
 
   is_valid("@@*"    , ""           , true );
-  is_valid("@.*"    , ""           , true );
-  is_valid(".@*"    , ""           , false);
   is_valid("@a*"    , ""           , true );
   is_valid("a@*"    , ""           , false);
-  is_valid(".a*"    , ""           , false);
-  //is_valid("a.*"    , ""           , false);
-  //is_valid("..*"    , ""           , false);
   is_valid("aa*"    , ""           , false);
   is_valid("ab*"    , ""           , false);
 
   is_valid("@*@*"   , ""           , true );
-  is_valid("@*.*"   , ""           , true );
-  is_valid(".*@*"   , ""           , true );
   is_valid("@*a*"   , ""           , true );
   is_valid("a*@*"   , ""           , true );
-  is_valid(".*a*"   , ""           , true );
-  is_valid("a*.*"   , ""           , true );
-  is_valid(".*.*"   , ""           , true );
   is_valid("a*a*"   , ""           , true );
   is_valid("a*b*"   , ""           , true );
 
