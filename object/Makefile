@@ -1,11 +1,11 @@
-CC      := gcc
-CFLAGS  := -std=c99 -O0 -Wall
-CPP     := $(CC) $(CFLAGS) -E
+CC     := gcc
+CFLAGS := -std=c99 -O0 -Wall
+CPP    := $(CC) $(CFLAGS) -E
 
-ALL_C := $(wildcard ../src/*.c)
-ALL_H := $(wildcard ../include/*.h)
-ALL_O := $(patsubst ../src/%.c,%.o,$(ALL_C))
-ALL_D := $(patsubst ../src/%.c,%.d,$(ALL_C))
+ALL_C  := $(wildcard ../src/*.c)
+ALL_H  := $(wildcard ../include/*.h)
+ALL_O  := $(patsubst ../src/%.c,%.o,$(ALL_C))
+ALL_D  := $(patsubst ../src/%.c,%.d,$(ALL_C))
 
 .PHONY: dummy
 dummy: $(ALL_O)

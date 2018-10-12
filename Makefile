@@ -6,18 +6,22 @@ ALL_C   := $(wildcard src/*.c)
 ALL_CH  := $(wildcard src/*.c include/*.h)
 ALL_O   := $(patsubst src/%.c,object/%.o,$(ALL_C))
 
-dummy: $(ALL_CH) jointest/jointest.c
-	@cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+TARGET_T := jointest.out
+ALL_CT   := $(wildcard jointest/*.c)
+ALL_OT   := $(patsubst jointest/%.c,jointest/object/%.o,$(ALL_CT))
+ALL_TO   := $(filter-out object/main.o,$(ALL_O) $(patsubst jointest/%.c,jointest/object/%.o,$(ALL_CT)))
+
+dummy: $(ALL_CH) $(ALL_CT)
+	cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 	$(CC) $(CFLAGS) $(ALL_O) -o $(TARGET)
-	@cp object/*.o jointest/object/
-	@rm jointest/object/main.o
-	$(CC) $(CFLAGS) -c jointest/jointest.c -o jointest/object/jointest.o
-	$(CC) $(CFLAGS) $(wildcard jointest/object/*.o) -o jointest.out
+	cd jointest/object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+	$(CC) $(CFLAGS) $(ALL_TO) -o $(TARGET_T)
+	./jointest.out
 
 notest: $(ALL_CH)
-	@cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+	cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 	$(CC) $(CFLAGS) $(ALL_O) -o $(TARGET)
 
 .PHONY: clean
 clean:
-	@rm -rf *.out *.stackdump tmp* object/*.o object/*.d jointest/object/*.o jointest/object/*.out
+	@rm -rf *.out *.stackdump *.dot *.png object/*.o object/*.d jointest/object/*.o jointest/object/*.d
