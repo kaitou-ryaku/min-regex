@@ -115,25 +115,36 @@ static void regex_to_node_list(/*{{{*/
       (*node_out) = node_current;
     }
 
-  // 次の文字が {'*'以外 or 存在しない} で、現在の文字が普通のアルファベットか空文字'@'の場合
+  // 次の文字が存在しない
+  // 次の文字が*以外の文字
+  // 次の文字が*'で、その次の文字が存在しない
+  // これらのいずれかで、かつ現在の文字が普通のアルファベットか空文字@の場合 ... 空文字@はis_magick()関数でマジック判定されない
   } else if (is_magick(regex_str[regex_begin]) == false){
     int regex_begin_next = regex_begin+1;
-    if (current_char == '@') {
-      node[node_current].symbol       = current_char;
-      node[node_current].symbol_index = regex_begin;
-      node[node_current].is_magick    = true;
-    } else if (current_char == '\\') {
-      assert(regex_begin_next < regex_end);
+
+    // 現在の文字がエスケープ -> 次の文字をis_magick = trueで登録
+    if (current_char == '\\') {
       const char next_char = regex_str[regex_begin+1];
       assert((next_char == '\\') || (next_char == '(') || (next_char == '|') || (next_char == ')') || (next_char == '*') || (next_char == '@'));
       node[node_current].symbol       = next_char;
       node[node_current].symbol_index = regex_begin+1;
-      regex_begin_next++;
       node[node_current].is_magick    = false;
+      regex_begin_next = regex_begin+2;
+
+    // 現在の文字が空文字 -> is_magick = trueで登録。これはis_magick()関数と逆
+    } else if (current_char == '@') {
+      node[node_current].symbol       = current_char;
+      node[node_current].symbol_index = regex_begin;
+      node[node_current].is_magick    = true;
+      regex_begin_next = regex_begin+1;
+
+    // 現在の文字が普通のアルファベット -> is_magick = falseで登録
     } else {
       node[node_current].symbol       = current_char;
       node[node_current].symbol_index = regex_begin;
       node[node_current].is_magick    = false;
+      regex_begin_next = regex_begin+1;
+
     }
     (*node_in) = node_current;
     (*node_empty)++;
