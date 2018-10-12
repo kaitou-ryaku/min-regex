@@ -16,7 +16,7 @@ dummy: $(ALL_CH) $(ALL_CT)
 	$(CC) $(CFLAGS) $(ALL_O) -o $(TARGET)
 	cd jointest/object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 	$(CC) $(CFLAGS) $(ALL_TO) -o $(TARGET_T)
-	./jointest.out
+#	./jointest.out
 
 notest: $(ALL_CH)
 	cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
