@@ -1,4 +1,5 @@
 #include "../include/node.h"
+#include "../include/textutil.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -17,10 +18,6 @@ static void regex_to_node_list(
   , int*      node_empty
   , const int node_list_size
 );
-static int search_corresponding_paren(const char* s, const int i, const int end);
-static int search_inner_letter(const char* s, const int i, const char c, const int end);
-static int search_next_char_index(const char *s, const int i, const int end);
-static bool is_magick(const char c);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
 static void debug_print_node_list(const NODE *node, const int node_size);
@@ -221,60 +218,6 @@ static void regex_to_node_list(/*{{{*/
   }
 
 }/*}}}*/
-static int search_corresponding_paren(const char* s, const int i, const int end) {/*{{{*/
-  assert(s[i]=='(');
-  int j=i, count=0;
-  while(j < end) {
-    if (s[j] == '\\') {
-      j=j+2;
-      continue;
-    }
-    if (s[j] == '(') count++;
-    if (s[j] == ')') count--;
-    if (count == 0) break;
-    j++;
-  }
-
-  if (count == 0) return j;
-  else return -1;
-}/*}}}*/
-static int search_inner_letter(const char* s, const int i, const char c, const int end) {/*{{{*/
-  assert((s[i]=='(') || (s[i]==c));
-  int j=i+1, count=0;
-  while(j < end) {
-    if (s[j] == '\\') {
-      j=j+2;
-      continue;
-    }
-    if (s[j] == '(') count++;
-    if (s[j] == ')') count--;
-    if (count == 0 && s[j] == c) break;
-    j++;
-  }
-
-  if (s[j] == c) return j;
-  else return -1;
-}/*}}}*/
-static int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
-  if (i >= end-1) return -1;
-
-  if (s[i] == '(') {
-    int ret = search_corresponding_paren(s, i, end);
-    assert(ret > 0);
-    if (ret+1 < end) return ret+1;
-    else return -1;
-  }
-
-  if ((is_magick(s[i]) == false) || s[i] == '*') {
-    return i+1;
-  } else {
-    assert(0);
-  }
-}/*}}}*/
-static bool is_magick(const char c) {/*{{{*/
-  if ((c == '(') | (c == '|') | (c == ')') | (c == '*')) return true;
-  else return false;
-}/*}}}*/
 extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
   for (int i=0; i<node_list_size; i++) {
     node[i].self         =  i;
@@ -286,68 +229,6 @@ extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
     node[i].in_snd       = -1;
     node[i].out_fst      = -1;
     node[i].out_snd      = -1;
-  }
-}/*}}}*/
-extern void simplify_regex( const char* original_regex, const int begin, const int end, char *simple_regex, int* current, const int size) {/*{{{*/
-  const char c = original_regex[begin];
-  if (c == '(') {
-    // (a|b|c|d) --> (a|(b|(c|d)))
-
-    // (a| -> (a|
-    const int end_pipe = search_corresponding_paren(original_regex, begin, end);
-    int pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
-    assert(pipe > 0);
-    simple_regex[(*current)] = '(';
-    (*current)++;
-    simplify_regex(original_regex, begin+1, pipe, simple_regex, current ,size);
-    simple_regex[(*current)] = '|';
-    (*current)++;
-
-    // |b| -> (b|
-    int next_pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
-    while (next_pipe > 0) {
-      assert(pipe+1 < next_pipe);
-      simple_regex[(*current)] = '(';
-      (*current)++;
-      simplify_regex(original_regex, pipe+1, next_pipe, simple_regex, current ,size);
-      simple_regex[(*current)] = '|';
-      (*current)++;
-      pipe      = next_pipe;
-      next_pipe = search_inner_letter(original_regex, next_pipe, '|', end_pipe);
-    }
-
-    // |d) -> d
-    simplify_regex(original_regex, pipe+1, end_pipe, simple_regex, current ,size);
-
-    // 最後に'|'の数だけ')'を書きまくる
-    pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
-    while (pipe > 0) {
-      simple_regex[(*current)] = ')';
-      (*current)++;
-      pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
-    }
-
-    // 分岐の続き
-    if (end_pipe+1 < end) {
-      simplify_regex( original_regex, end_pipe+1, end, simple_regex, current ,size);
-    }
-
-  } else if (c == '\\') {
-    // エスケープシーケンス
-    simple_regex[(*current)  ] = '\\';
-    simple_regex[(*current)+1] = original_regex[begin+1];
-    (*current) = (*current) + 2;
-    if (begin+2 < end) {
-      simplify_regex( original_regex, begin+2, end, simple_regex, current ,size);
-    }
-
-  } else {
-    // 処理の不要な普通の文字
-    simple_regex[(*current)] = c;
-    (*current)++;
-    if (begin+1 < end) {
-      simplify_regex( original_regex, begin+1, end, simple_regex, current ,size);
-    }
   }
 }/*}}}*/
 /*}}}*/
@@ -367,10 +248,6 @@ static void debug_print_regex_to_node_list_args(const char* regex_str, const int
 extern void (*__static_node_func__(const char *func_name)) (void) {
   __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
   __REGISTER_STATIC_FUNCTION__(regex_to_node_list);
-  __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
-  __REGISTER_STATIC_FUNCTION__(search_inner_letter);
-  __REGISTER_STATIC_FUNCTION__(search_next_char_index);
-  __REGISTER_STATIC_FUNCTION__(is_magick);
   __REGISTER_STATIC_FUNCTION__(debug_print_node_list);
   __REGISTER_STATIC_FUNCTION__(debug_print_regex_to_node_list_args);
   return NULL;
