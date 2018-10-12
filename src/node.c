@@ -90,7 +90,7 @@ static void regex_to_node_list(/*{{{*/
   // debug_print_regex_to_node_list_args(regex_str, regex_begin, regex_end, regex_next, *node_empty);
 
   // 次の文字*が存在する場合
-  if ((regex_next > 0) && (regex_str[regex_next] == '*')) {
+  if ((regex_next > 0) && (regex_str[regex_next] == '*') && (current_char != '\\')) {
     node[node_current  ].symbol       = '*';
     node[node_current  ].symbol_index = regex_next;
     node[node_current  ].is_magick    = true;
