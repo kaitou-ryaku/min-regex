@@ -24,4 +24,6 @@ notest: $(ALL_CH)
 
 .PHONY: clean
 clean:
-	@rm -rf *.out *.stackdump *.dot *.png object/*.o object/*.d jointest/object/*.o jointest/object/*.d
+	rm -rf *.out *.stackdump *.dot *.png
+	cd object && rm -rf *.o *.d
+	cd jointest/object && rm -rf *.o *.d
