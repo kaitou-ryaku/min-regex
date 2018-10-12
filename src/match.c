@@ -44,8 +44,8 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
   assert((*step) < match_list_size);
   if (is_back && ((*step) == 0)) return;
 
-  // バックトラックでは、今までのステップ中に含まれる最近の役文字に移動する。
-  // その役文字へ来訪様式の違いと、次回ステップの関係は
+  // バックトラックでは、今までのステップ中に含まれる最近のメタ文字に移動する。
+  // そのメタ文字へ来訪様式の違いと、次回ステップの関係は
   // * 通常訪問 -> fstを新規訪問
   // * バックトラックで訪問。fstのみ訪問済み。sndは空でない -> sndを新規訪問
   // * バックトラックで訪問。fstのみ訪問済み。sndが空 -> 更にバックトラック
@@ -54,7 +54,7 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
   const MATCH m = match[(*step)];
   const NODE  n = node[m.node_index];
 
-  // 役文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
+  // メタ文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
   if (n.is_magick) {
     // 文字列が減らないまま再訪したかチェック
     bool revisit_without_decrease = false;
