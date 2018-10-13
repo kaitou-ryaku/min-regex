@@ -17,10 +17,8 @@ static bool is_match(const char* regex_str, const char* match_str) {
   simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
   simple_regex[current] = '\0';
   NODE node[200];
-  initialize_node(node, 200);
   regex_to_all_node(simple_regex, node, 200);
   MATCH match[200];
-  initialize_match(match, 200);
   const int step = match_all_str(match_str, node, match, 200);
 
   bool ret;

@@ -8,6 +8,7 @@
 
 static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
+static void initialize_match( MATCH* match, const int match_list_size);
 static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
 static int find_back_node(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
@@ -17,7 +18,7 @@ static void debug_print_match_str_args(const char* str, const int* seek, const N
 static void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
 // 関数本体/*{{{*/
-extern void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
+static void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
   for (int i=0; i<match_list_size; i++) {
     match[i].step       =  i;    // オートマトン遍歴のステップ数。
     match[i].node_index = -1;    // オートマトンの添字番号。
@@ -25,6 +26,8 @@ extern void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
   }
 }/*}}}*/
 extern int match_all_str( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  initialize_match(match, match_list_size);
+
   int step = 0;
   // 0ステップ目は、str[-1]に対応する空文字を^にマッチしたと考える
   match[step].node_index = 0;  // node '^'
@@ -158,6 +161,7 @@ static void debug_print_match_str_dot(const NODE* node, const MATCH* match, cons
 /*}}}*/
 // static関数の密輸関数/*{{{*/
 extern void (*__static_match_func__(const char *func_name)) (void) {
+  __REGISTER_STATIC_FUNCTION__(initialize_match);
   __REGISTER_STATIC_FUNCTION__(match_str);
   __REGISTER_STATIC_FUNCTION__(find_back_node);
   __REGISTER_STATIC_FUNCTION__(debug_print_match_list);

@@ -18,6 +18,7 @@ static void regex_to_node_list(
   , int*      node_empty
   , const int node_list_size
 );
+static void initialize_node(NODE *node, const int node_list_size);
 static int get_next_token(const char* regex_str, const int regex_begin, const int regex_end);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
@@ -30,6 +31,8 @@ extern void regex_to_all_node(/*{{{*/
   , NODE*     node
   , const int node_list_size
 ) {
+
+  initialize_node(node, node_list_size);
 
   // node[0]の始点^と、node[1]の終点$を定義
   const int regex_begin = 0;
@@ -208,7 +211,7 @@ static void regex_to_node_list(/*{{{*/
     (*node_out) = node_end;
   }/*}}}*/
 }/*}}}*/
-extern void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
+static void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
   for (int i=0; i<node_list_size; i++) {
     node[i].self         =  i;
     node[i].total        = -1;
@@ -268,7 +271,9 @@ static void debug_print_regex_to_node_list_args(const char* regex_str, const int
 // static関数の密輸関数/*{{{*/
 extern void (*__static_node_func__(const char *func_name)) (void) {
   __REGISTER_STATIC_FUNCTION__(search_corresponding_paren);
+  __REGISTER_STATIC_FUNCTION__(initialize_node);
   __REGISTER_STATIC_FUNCTION__(regex_to_node_list);
+  __REGISTER_STATIC_FUNCTION__(get_next_token);
   __REGISTER_STATIC_FUNCTION__(debug_print_node_list);
   __REGISTER_STATIC_FUNCTION__(debug_print_regex_to_node_list_args);
   return NULL;

@@ -6,6 +6,5 @@
 
 void (*__static_node_func__()) (void);
 void regex_to_all_node( const char* regex_str, NODE* node, const int node_list_size);
-void initialize_node( NODE *node, const int node_list_size);
 
 #endif
