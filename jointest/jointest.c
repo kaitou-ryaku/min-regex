@@ -1511,6 +1511,59 @@ int main(void) {
   is_valid("\\@a" , "|a"    , false);
   is_valid("\\@a" , "*a"    , false);
   is_valid("\\@a" , "@a"    , true );/*}}}*/
+
+  // 長い正規表現
+  is_valid("(a|b)(a|b)(a|b)(a|b)", ""        , false);/*{{{*/
+  is_valid("(a|b)(a|b)(a|b)(a|b)", "aaaa"    , true );
+  is_valid("(a|b)(a|b)(a|b)(a|b)", "abab"    , true );
+  is_valid("(a|b)(a|b)(a|b)(a|b)", "aba"     , false);
+  is_valid("(a|b)(a|b)(a|b)(a|b)", "aaaaa"   , false);
+  is_valid("(a|b|c|d|e|f|g|h)",    "a"       , true );
+  is_valid("(a|b|c|d|e|f|g|h)",    "b"       , true );
+  is_valid("(a|b|c|d|e|f|g|h)",    "h"       , true );
+  is_valid("(a|b|c|d|e|f|g|h)",    "i"       , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , ""  , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "(" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "|" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , ")" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "*" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "@" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\", true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "a" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "b" , true );
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "c" , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\("   , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\|"   , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\)"   , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\*"   , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\@"   , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\\\"  , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\\\a" , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\\\b" , false);
+  is_valid("(\\(|\\||\\)|\\*|\\@|\\\\|a|b)"  , "\\\\c" , false);
+  is_valid("(\\**|\\\\)", ""    , true );
+  is_valid("(\\**|\\\\)", "*"   , true );
+  is_valid("(\\**|\\\\)", "**"  , true );
+  is_valid("(\\**|\\\\)", "***" , true );
+  is_valid("(\\**|\\\\)", "\\"  , true );
+  is_valid("(\\**|\\\\)", "\\\\", false);
+  is_valid("((a*|b*)*|(c*|d*))*" , ""    , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "a"   , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "aa"  , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "b"   , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "bb"  , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "ab"  , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "ba"  , true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "abcd", true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "abca", true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "caca", true );
+  is_valid("((a*|b*)*|(c*|d*))*" , "cac*", false);
+  is_valid("((a*|b*)*|(c*|d*))*" , "cac*", false);
+  is_valid("(ab|ab)*"            , ""    , true );
+  is_valid("(ab|ab)*"            , "a"   , false);
+  is_valid("(ab|ab)*"            , "ab"  , true );
+  is_valid("(ab|ab)*"            , "aba" , false);
+  is_valid("(ab|ab)*"            , "abab", true );/*}}}*/
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;
 }
