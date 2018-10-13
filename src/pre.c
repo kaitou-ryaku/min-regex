@@ -6,19 +6,12 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
   const char c = original_regex[begin];
   if (c == '(') {
     // (a|b|c|d) --> (a|(b|(c|d)))
+    const int end_pipe  = search_corresponding_paren(original_regex, begin, end);
 
-    // (a| -> (a|
-    const int end_pipe = search_corresponding_paren(original_regex, begin, end);
-    int pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
-    assert(pipe > 0);
-    simple_regex[(*current)] = '(';
-    (*current)++;
-    simplify_regex(original_regex, begin+1, pipe, simple_regex, current ,size);
-    simple_regex[(*current)] = '|';
-    (*current)++;
-
-    // |b| -> (b|
-    int next_pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
+    // (a| -> (a| ループ1周目
+    // |b| -> (b| ループ2周目以降
+    int       pipe      = begin; // ループの一周目では(を指す
+    int       next_pipe = search_inner_letter(original_regex, pipe, '|', end_pipe);
     while (next_pipe > 0) {
       assert(pipe+1 < next_pipe);
       simple_regex[(*current)] = '(';
