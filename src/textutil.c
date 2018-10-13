@@ -36,30 +36,7 @@ extern int search_inner_letter(const char* s, const int i, const char c, const i
   if (s[j] == c) return j;
   else return -1;
 }/*}}}*/
-extern int search_next_char_index(const char *s, const int i, const int end) {/*{{{*/
-  if (i >= end-1) return -1;
-
-  if (s[i] == '(') {
-    int ret = search_corresponding_paren(s, i, end);
-    assert(ret > 0);
-    if (ret+1 < end) return ret+1;
-    else return -1;
-  }
-
-  if ((is_magick(s[i]) == false) || s[i] == '*') {
-    return i+1;
-  } else {
-    assert(0);
-  }
-}/*}}}*/
 extern bool is_magick(const char c) {/*{{{*/
-  if ((c == '(') | (c == '|') | (c == ')') | (c == '*')) return true;
+  if ((c == '(') || (c == '|') || (c == ')') || (c == '*') ||  (c == '@') || (c == '\\')) return true;
   else return false;
-}/*}}}*/
-extern int search_factor_end(const char* s, const int i, const int end) {/*{{{*/
-  int ret;
-  if (s[i] == '(') ret = search_corresponding_paren(s, i, end);
-  else             ret = i;
-  assert(ret >= 0);
-  return i;
 }/*}}}*/
