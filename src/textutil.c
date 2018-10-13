@@ -56,3 +56,10 @@ extern bool is_magick(const char c) {/*{{{*/
   if ((c == '(') | (c == '|') | (c == ')') | (c == '*')) return true;
   else return false;
 }/*}}}*/
+extern int search_factor_end(const char* s, const int i, const int end) {/*{{{*/
+  int ret;
+  if (s[i] == '(') ret = search_corresponding_paren(s, i, end);
+  else             ret = i;
+  assert(ret >= 0);
+  return i;
+}/*}}}*/
