@@ -1564,6 +1564,84 @@ int main(void) {
   is_valid("(ab|ab)*"            , "ab"  , true );
   is_valid("(ab|ab)*"            , "aba" , false);
   is_valid("(ab|ab)*"            , "abab", true );/*}}}*/
+
+  // 分岐のない(...)のチェック
+  is_valid("(a)"      , ""     , false);/*{{{*/
+  is_valid("(a)"      , "a"    , true );
+  is_valid("(a)"      , "aa"   , false);
+  is_valid("(a)"      , "aaa"  , false);
+  is_valid("(a)"      , "aaaa" , false);
+  is_valid("(aa)"     , ""     , false);
+  is_valid("(aa)"     , "a"    , false);
+  is_valid("(aa)"     , "aa"   , true );
+  is_valid("(aa)"     , "aaa"  , false);
+  is_valid("(aa)"     , "aaaa" , false);
+  is_valid("(ab)"     , ""     , false);
+  is_valid("(ab)"     , "a"    , false);
+  is_valid("(ab)"     , "ab"   , true );
+  is_valid("(ab)"     , "aba"  , false);
+  is_valid("(ab)"     , "abab" , false);
+  is_valid("(a)(a)"   , ""     , false);
+  is_valid("(a)(a)"   , "a"    , false);
+  is_valid("(a)(a)"   , "aa"   , true );
+  is_valid("(a)(a)"   , "aaa"  , false);
+  is_valid("(a)(a)"   , "aaaa" , false);
+  is_valid("(aa)(aa)" , ""     , false);
+  is_valid("(aa)(aa)" , "a"    , false);
+  is_valid("(aa)(aa)" , "aa"   , false);
+  is_valid("(aa)(aa)" , "aaa"  , false);
+  is_valid("(aa)(aa)" , "aaaa" , true );
+  is_valid("(ab)(ab)" , ""     , false);
+  is_valid("(ab)(ab)" , "a"    , false);
+  is_valid("(ab)(ab)" , "ab"   , false);
+  is_valid("(ab)(ab)" , "aba"  , false);
+  is_valid("(ab)(ab)" , "abab" , true );
+  is_valid("(a)*"     , ""     , true );
+  is_valid("(a)*"     , "a"    , true );
+  is_valid("(a)*"     , "aa"   , true );
+  is_valid("(a)*"     , "aaa"  , true );
+  is_valid("(a)*"     , "aaaa" , true );
+  is_valid("(aa)*"    , ""     , true );
+  is_valid("(aa)*"    , "a"    , false);
+  is_valid("(aa)*"    , "aa"   , true );
+  is_valid("(aa)*"    , "aaa"  , false);
+  is_valid("(aa)*"    , "aaaa" , true );
+  is_valid("(ab)*"    , ""     , true );
+  is_valid("(ab)*"    , "a"    , false);
+  is_valid("(ab)*"    , "ab"   , true );
+  is_valid("(ab)*"    , "aba"  , false);
+  is_valid("(ab)*"    , "abab" , true );
+  is_valid("(\\(a)"   , "("    , false);
+  is_valid("(\\(a)"   , "(a"   , true );
+  is_valid("(\\(a)"   , "(aa"  , false);
+  is_valid("(\\(a)"   , "(aaa" , false);
+  is_valid("(\\(a)"   , "(aaaa", false);
+  is_valid("(\\(aa)"  , "("    , false);
+  is_valid("(\\(aa)"  , "(a"   , false);
+  is_valid("(\\(aa)"  , "(aa"  , true );
+  is_valid("(\\(aa)"  , "(aaa" , false);
+  is_valid("(\\(aa)"  , "(aaaa", false);
+  is_valid("(\\(ab)"  , "("    , false);
+  is_valid("(\\(ab)"  , "(a"   , false);
+  is_valid("(\\(ab)"  , "(ab"  , true );
+  is_valid("(\\(ab)"  , "(aba" , false);
+  is_valid("(\\(ab)"  , "(abab", false);
+  is_valid("(a\\()"   , "("    , false);
+  is_valid("(a\\()"   , "a("   , true );
+  is_valid("(a\\()"   , "aa("  , false);
+  is_valid("(a\\()"   , "aaa(" , false);
+  is_valid("(a\\()"   , "aaaa(", false);
+  is_valid("(aa\\()"  , "("    , false);
+  is_valid("(aa\\()"  , "a("   , false);
+  is_valid("(aa\\()"  , "aa("  , true );
+  is_valid("(aa\\()"  , "aaa(" , false);
+  is_valid("(aa\\()"  , "aaaa(", false);
+  is_valid("(ab\\()"  , "("    , false);
+  is_valid("(ab\\()"  , "a("   , false);
+  is_valid("(ab\\()"  , "ab("  , true );
+  is_valid("(ab\\()"  , "aba(" , false);
+  is_valid("(ab\\()"  , "abab(", false);/*}}}*/
+
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;
 }

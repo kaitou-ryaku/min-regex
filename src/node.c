@@ -87,6 +87,8 @@ static void regex_to_node_list(/*{{{*/
   assert(*node_empty < node_list_size);
   const int token_begin  = regex_begin;
   const int token_end    = get_next_token(regex_str, regex_begin, regex_end);
+  // debug_print_node_list(node, *node_empty);
+  // debug_print_regex_to_node_list_args(regex_str, regex_begin, regex_end, token_end, *node_empty);
 
   // 全トークンの解析が完了している場合
   if (token_begin >= token_end) return;
@@ -100,7 +102,7 @@ static void regex_to_node_list(/*{{{*/
   assert(c_begin != '|');
   assert(c_begin != '*');
 
-  // \\* or (...)* or \\@* or \\** or a*/*{{{*/
+  // \\* or *による繰り返し /*{{{*/
   if (c_end == '*') {
     // \\* (アスタリスクをエスケープしたやつの場合)
     if (c_begin == '\\' && token_begin+2 == token_end) {
@@ -131,7 +133,7 @@ static void regex_to_node_list(/*{{{*/
       node[tmp_in ].in_fst     = node_begin; // * -> 繰り返すやつ
     }
   }/*}}}*/
-  // (...) or \\@ or a (繰り返さない場合)/*{{{*/
+  // (...) or \\@ or @ or a /*{{{*/
   else {
 
     // (...)
@@ -150,22 +152,33 @@ static void regex_to_node_list(/*{{{*/
       node_end = node_begin+1;
       (*node_empty)++;
 
-      const int regex_pipe = search_inner_letter(regex_str, regex_begin, '|', regex_end);
       int tmp_in, tmp_out;
+      const int regex_pipe = search_inner_letter(regex_str, regex_begin, '|', regex_end);
 
-      // (...|の処理
-      regex_to_node_list(regex_str, token_begin+1, regex_pipe, node, &tmp_in, &tmp_out, node_empty, node_list_size);
-      node[node_begin  ].out_fst = tmp_in;
-      node[node_begin+1].in_fst  = tmp_out;
-      node[tmp_in].in_fst        = node_begin;
-      node[tmp_out].out_fst      = node_begin+1;
+      // (...)の場合
+      if (regex_pipe < 0) {
+        regex_to_node_list(regex_str, token_begin+1, token_end-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+        node[node_begin  ].out_fst = tmp_in;
+        node[node_begin+1].in_fst  = tmp_out;
+        node[tmp_in].in_fst        = node_begin;
+        node[tmp_out].out_fst      = node_begin+1;
+      }
+      // (...|...)の場合
+      else {
+        // (...|の処理
+        regex_to_node_list(regex_str, token_begin+1, regex_pipe, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+        node[node_begin  ].out_fst = tmp_in;
+        node[node_begin+1].in_fst  = tmp_out;
+        node[tmp_in].in_fst        = node_begin;
+        node[tmp_out].out_fst      = node_begin+1;
 
-      // |...)の処理
-      regex_to_node_list(regex_str, regex_pipe+1, token_end-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
-      node[node_begin  ].out_snd = tmp_in;
-      node[node_begin+1].in_snd  = tmp_out;
-      node[tmp_in].in_fst        = node_begin;
-      node[tmp_out].out_fst      = node_begin+1;
+        // |...)の処理
+        regex_to_node_list(regex_str, regex_pipe+1, token_end-1, node, &tmp_in, &tmp_out, node_empty, node_list_size);
+        node[node_begin  ].out_snd = tmp_in;
+        node[node_begin+1].in_snd  = tmp_out;
+        node[tmp_in].in_fst        = node_begin;
+        node[tmp_out].out_fst      = node_begin+1;
+      }
 
     // \\@ or \\*
     } else if (c_begin == '\\') {
@@ -225,6 +238,7 @@ static void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
   }
 }/*}}}*/
 static int get_next_token(const char* regex_str, const int regex_begin, const int regex_end) {/*{{{*/
+
   char c = regex_str[regex_begin];
   int ret = 0;
 
