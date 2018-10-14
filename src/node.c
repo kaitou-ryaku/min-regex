@@ -9,27 +9,27 @@
 
 // 関数プロトタイプ/*{{{*/
 static void regex_to_node_list(
-  const char* regex_str
-  , const int regex_begin
-  , const int regex_end
-  , NODE*     node
-  , int*      node_in
-  , int*      node_out
-  , int*      node_empty
-  , const int node_list_size
+  const char*       regex_str
+  , const int       regex_begin
+  , const int       regex_end
+  , MIN_REGEX_NODE* node
+  , int*            node_in
+  , int*            node_out
+  , int*            node_empty
+  , const int       node_list_size
 );
-static void initialize_node(NODE *node, const int node_list_size);
+static void initialize_node(MIN_REGEX_NODE *node, const int node_list_size);
 static int get_next_token(const char* regex_str, const int regex_begin, const int regex_end);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
-static void debug_print_node_list(const NODE *node, const int node_size);
+static void debug_print_node_list(const MIN_REGEX_NODE *node, const int node_size);
 static void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty);
 /*}}}*/
 // 関数本体/*{{{*/
 extern void regex_to_all_node(/*{{{*/
-  const char* regex_str
-  , NODE*     node
-  , const int node_list_size
+  const char*       regex_str
+  , MIN_REGEX_NODE* node
+  , const int       node_list_size
 ) {
 
   initialize_node(node, node_list_size);
@@ -72,14 +72,14 @@ extern void regex_to_all_node(/*{{{*/
   }
 }/*}}}*/
 static void regex_to_node_list(/*{{{*/
-  const char* regex_str
-  , const int regex_begin
-  , const int regex_end
-  , NODE*     node
-  , int*      node_in    // 出力only
-  , int*      node_out   // 出力only
-  , int*      node_empty // 入出力
-  , const int node_list_size
+  const char*       regex_str
+  , const int       regex_begin
+  , const int       regex_end
+  , MIN_REGEX_NODE* node
+  , int*            node_in    // 出力only
+  , int*            node_out   // 出力only
+  , int*            node_empty // 入出力
+  , const int       node_list_size
 ) {
   // [regex_begin = token_begin] 最初の1個のトークン [token_end] [token_end+1] 2番目のトークン ... n番目のトークン ... [regex_end]
   // 上記の右端から左端の全体を解析し、入口のノード添字を*node_in、出口のノード添字を*node_outとして返す
@@ -224,7 +224,7 @@ static void regex_to_node_list(/*{{{*/
     (*node_out) = node_end;
   }/*}}}*/
 }/*}}}*/
-static void initialize_node(NODE *node, const int node_list_size) {/*{{{*/
+static void initialize_node(MIN_REGEX_NODE *node, const int node_list_size) {/*{{{*/
   for (int i=0; i<node_list_size; i++) {
     node[i].self         =  i;
     node[i].total        = -1;
@@ -271,9 +271,9 @@ static int get_next_token(const char* regex_str, const int regex_begin, const in
 }/*}}}*/
 /*}}}*/
 // デバッグ用関数/*{{{*/
-static void debug_print_node_list(const NODE *node, const int node_size) {
+static void debug_print_node_list(const MIN_REGEX_NODE *node, const int node_size) {
   for (int i=0; i<node_size; i++) {
-    NODE n = node[i];
+    MIN_REGEX_NODE n = node[i];
     fprintf(stderr, "%3d %3d %c %3d %3d  %3d %3d  %3d %3d\n", i, node_size, n.symbol, n.symbol_index, n.is_magick, n.in_fst, n.in_snd, n.out_fst, n.out_snd);
   }
 }

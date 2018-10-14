@@ -24,7 +24,7 @@ int main(int argc, const char **argv) {
   fprintf(stderr, "simplify : %s\n", simple_regex);
 
   // 簡約された正規表現をオートマトンに変換
-  NODE node[100];
+  MIN_REGEX_NODE node[100];
   regex_to_all_node(simple_regex, node, 100);
 
   // オートマトンをdotファイルに書き出し
@@ -41,7 +41,7 @@ int main(int argc, const char **argv) {
 
   // オートマトンと比較文字列をマッチング
   fprintf(stderr, "compare  : %s\n", match_str);
-  MATCH match[50];
+  MIN_REGEX_MATCH match[50];
   const int step = exact_match(match_str, node, match, 50);
   // const int step = forward_shortest_match( match_str, node, match, 50);
   // const int step = forward_longest_match(  match_str, node, match, 50);

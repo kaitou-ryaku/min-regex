@@ -1,5 +1,5 @@
-#ifndef __PRE__
-#define __PRE__
+#ifndef __MIN_REGEX_TEXTUTILS__
+#define __MIN_REGEX_TEXTUTILS__
 #include <stdbool.h>
 
 int search_corresponding_paren(const char* s, const int i, const int end);

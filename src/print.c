@@ -4,12 +4,12 @@
 #include "../include/match.h"
 
 // 関数プロトタイプ/*{{{*/
-static void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color);
+static void node_list_to_dot_inside( FILE *fp, const int graph_id, const MIN_REGEX_NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color);
 /*}}}*/
 // 関数本体/*{{{*/
-static void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
+static void node_list_to_dot_inside( FILE *fp, const int graph_id, const MIN_REGEX_NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
   for (int i=0; i<node[0].total;i ++) {
-    NODE n = node[i];
+    MIN_REGEX_NODE n = node[i];
     fprintf( fp, "  ");
     fprintf( fp, "%05d%05d [ "      , graph_id, i);
     if (n.symbol == '\\') {
@@ -40,12 +40,12 @@ static void node_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *n
   fprintf( fp, "\n");
 
   for (int i=0; i<node[0].total; i++) {
-    NODE n = node[i];
+    MIN_REGEX_NODE n = node[i];
     if (n.out_fst >= 0) fprintf( fp, "  %05d%05d -> %05d%05d\n", graph_id, i, graph_id, n.out_fst);
     if (n.out_snd >= 0) fprintf( fp, "  %05d%05d -> %05d%05d\n", graph_id, i, graph_id, n.out_snd);
   }
 }/*}}}*/
-extern void node_list_to_dot( FILE *fp, const NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
+extern void node_list_to_dot( FILE *fp, const MIN_REGEX_NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
   fprintf( fp, "digraph graphname {\n");
   fprintf( fp, "  graph [rankdir = LR]\n");
 
@@ -53,7 +53,7 @@ extern void node_list_to_dot( FILE *fp, const NODE *node, const int* topic_node_
 
   fprintf( fp, "}\n");
 }/*}}}*/
-extern void node_match_list_to_dot_inside( FILE *fp, const int graph_id, const NODE *node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color, const MATCH *match, const int step) {/*{{{*/
+extern void node_match_list_to_dot_inside( FILE *fp, const int graph_id, const MIN_REGEX_NODE *node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color, const MIN_REGEX_MATCH *match, const int step) {/*{{{*/
 
   int topic_node_list[100] = {0};
   for (int i=0; i<step; i++) {
@@ -66,7 +66,7 @@ extern void node_match_list_to_dot_inside( FILE *fp, const int graph_id, const N
   print_match_list(fp, node, match, step);
   fprintf( fp, "\", shape=none]\n");
 }/*}}}*/
-extern void node_match_list_to_dot( FILE *fp, const NODE *node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color, const MATCH *match, const int step) {/*{{{*/
+extern void node_match_list_to_dot( FILE *fp, const MIN_REGEX_NODE *node, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color, const MIN_REGEX_MATCH *match, const int step) {/*{{{*/
   fprintf( fp, "digraph graphname {\n");
   fprintf( fp, "  graph [rankdir = LR]\n");
 
@@ -76,7 +76,7 @@ extern void node_match_list_to_dot( FILE *fp, const NODE *node, const char* font
 
   fprintf( fp, "}\n");
 }/*}}}*/
-extern void print_match_list( FILE* fp, const NODE* node, const MATCH* match, const int step) {/*{{{*/
+extern void print_match_list( FILE* fp, const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step) {/*{{{*/
   for (int i=0; i<step; i++) {
     fprintf( fp, "%c", node[match[i].node_index].symbol);
   }

@@ -8,29 +8,29 @@
 
 static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
-static void initialize_match( MATCH* match, const int match_list_size);
-static int arbitary_match( const int begin, const int end, const char* str, const NODE* node, MATCH *match, const int match_list_size);
-static void match_str( const char* str, const int str_length, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
-static int find_back_node(const NODE* node, const MATCH* match, const int step);
+static void initialize_match( MIN_REGEX_MATCH* match, const int match_list_size);
+static int arbitary_match( const int begin, const int end, const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
+static void match_str( const char* str, const int str_length, int* seek, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, int* step, const int match_list_size, const bool is_back);
+static int find_back_node(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
-static void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step);
-static void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back);
-static void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step);
+static void debug_print_match_list(const MIN_REGEX_MATCH *match, const MIN_REGEX_NODE* node, const char* str, const int total_step);
+static void debug_print_match_str_args(const char* str, const int* seek, const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH *match, const int* step, const int match_list_size, const bool is_back);
+static void debug_print_match_str_dot(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step);
 /*}}}*/
 // 関数本体/*{{{*/
-static void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
+static void initialize_match( MIN_REGEX_MATCH* match, const int match_list_size) {/*{{{*/
   for (int i=0; i<match_list_size; i++) {
     match[i].step       =  i;    // オートマトン遍歴のステップ数。
     match[i].node_index = -1;    // オートマトンの添字番号。
     match[i].str_index  = -1;    // 文字列の添字番号。
   }
 }/*}}}*/
-extern int exact_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+extern int exact_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int step = arbitary_match(0, strlen(str), str, node, match, match_list_size);
   return step;
 }/*}}}*/
-extern int forward_shortest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+extern int forward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int step;
   for (int end=0; end<=strlen(str); end++) {
     step = arbitary_match(0, end, str, node, match, match_list_size);
@@ -38,7 +38,7 @@ extern int forward_shortest_match( const char* str, const NODE* node, MATCH *mat
   }
   return step;
 }/*}}}*/
-extern int forward_longest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+extern int forward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int step;
   for (int rest=0; rest<=strlen(str); rest++) {
     int end = strlen(str) - rest;
@@ -47,7 +47,7 @@ extern int forward_longest_match( const char* str, const NODE* node, MATCH *matc
   }
   return step;
 }/*}}}*/
-extern int backward_longest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+extern int backward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int step;
   for (int begin=0; begin<=strlen(str); begin++) {
     step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
@@ -55,7 +55,7 @@ extern int backward_longest_match( const char* str, const NODE* node, MATCH *mat
   }
   return step;
 }/*}}}*/
-extern int backward_shortest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+extern int backward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int step;
   for (int rest=0; rest<=strlen(str); rest++) {
     int begin = strlen(str) - rest;
@@ -64,7 +64,7 @@ extern int backward_shortest_match( const char* str, const NODE* node, MATCH *ma
   }
   return step;
 }/*}}}*/
-static int arbitary_match( const int begin, const int end, const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+static int arbitary_match( const int begin, const int end, const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   // str[begin], str[begin+1], ..., str[end-1], (str[end]==\0)
   // と完全一致すれば、埋まったmatch[]配列のサイズを返す
 
@@ -88,7 +88,7 @@ static int arbitary_match( const int begin, const int end, const char* str, cons
 
   return step;
 }/*}}}*/
-static void match_str( const char* str, const int str_length, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
+static void match_str( const char* str, const int str_length, int* seek, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
   // 一時的に画像を書き出し
   // debug_print_match_str_dot(node, match, *(step));
   // debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
@@ -103,15 +103,15 @@ static void match_str( const char* str, const int str_length, int* seek, const N
   // * バックトラックで訪問。fstのみ訪問済み。sndが空 -> 更にバックトラック
   // * バックトラックで訪問。fst,snd共に探索済み -> 更にバックトラック
 
-  const MATCH m = match[(*step)];
-  const NODE  n = node[m.node_index];
+  const MIN_REGEX_MATCH m = match[(*step)];
+  const MIN_REGEX_NODE  n = node[m.node_index];
 
   // メタ文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
   if (n.is_magick) {
     // 文字列が減らないまま再訪したかチェック
     bool revisit_without_decrease = false;
     for (int i=0; i<(*step)-1; i++) {
-      const MATCH tmp_m = match[i];
+      const MIN_REGEX_MATCH tmp_m = match[i];
       if (tmp_m.str_index == (*seek) && tmp_m.node_index == m.node_index) {
         revisit_without_decrease = true;
         break;
@@ -167,10 +167,10 @@ static void match_str( const char* str, const int str_length, int* seek, const N
 
   }
 }/*}}}*/
-static int find_back_node(const NODE* node, const MATCH* match, const int step) {/*{{{*/
+static int find_back_node(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step) {/*{{{*/
   int delta = 1;
   while (delta < step) {
-    const NODE back_node  = node[match[step-delta].node_index];
+    const MIN_REGEX_NODE back_node  = node[match[step-delta].node_index];
     if (back_node.is_magick) break;
     delta++;
   }
@@ -178,10 +178,10 @@ static int find_back_node(const NODE* node, const MATCH* match, const int step) 
 }/*}}}*/
 /*}}}*/
 // デバッグ用関数本体/*{{{*/
-static void debug_print_match_list(const MATCH *match, const NODE* node, const char* str, const int total_step) {/*{{{*/
+static void debug_print_match_list(const MIN_REGEX_MATCH *match, const MIN_REGEX_NODE* node, const char* str, const int total_step) {/*{{{*/
   for (int i=0; i<total_step; i++) {
-    MATCH m = match[i];
-    NODE  n = node[match[i].node_index];
+    MIN_REGEX_MATCH m = match[i];
+    MIN_REGEX_NODE  n = node[match[i].node_index];
     char  c;
     if (m.str_index < 0 ) c = ' ';
     else c = str[m.str_index];
@@ -189,13 +189,13 @@ static void debug_print_match_list(const MATCH *match, const NODE* node, const c
   }
 }/*}}}*/
 
-static void debug_print_match_str_args(const char* str, const int* seek, const NODE* node, const MATCH *match, const int* step, const int match_list_size, const bool is_back) {
+static void debug_print_match_str_args(const char* str, const int* seek, const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH *match, const int* step, const int match_list_size, const bool is_back) {
   char c;
   if ((*seek) == -1) c = ' ';
   else               c = str[(*seek)];
   fprintf(stderr, "\n--- %c %3d %3d %s ---\n", c, (*seek), (*step), is_back?"back":"forward");
 }
-static void debug_print_match_str_dot(const NODE* node, const MATCH* match, const int step) {
+static void debug_print_match_str_dot(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step) {
   // 一時的に画像を書き出し
   debug_id++;
   char filename[100];

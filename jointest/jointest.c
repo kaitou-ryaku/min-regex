@@ -18,9 +18,9 @@ static bool is_match(const char* regex_str, const char* match_str, const int opt
   int current = 0;
   simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
   simple_regex[current] = '\0';
-  NODE node[200];
+  MIN_REGEX_NODE node[200];
   regex_to_all_node(simple_regex, node, 200);
-  MATCH match[200];
+  MIN_REGEX_MATCH match[200];
 
   int step;
   if      (option == 0) step = exact_match(            match_str, node, match, 200);
@@ -50,8 +50,8 @@ static void is_valid(const int line, const char* regex_str, const char* match_st
   }
   if (trial != answer) {
     fprintf(stderr, "LINE:%04d [\x1b[31mX\x1b[39m] \x1b[41m%15s       \"%s\"\x1b[49m", line, regex_str, match_str);
-    if (answer) fprintf(stderr, "  SHOULD BE MATCH BUT RESULT IS UNMATCH.\n");
-    else        fprintf(stderr, "  SHOULD BE UNMATCH BUT RESULT IS MATCH.\n");
+    if (answer) fprintf(stderr, "  SHOULD BE MIN_REGEX_MATCH BUT RESULT IS UNMIN_REGEX_MATCH.\n");
+    else        fprintf(stderr, "  SHOULD BE UNMIN_REGEX_MATCH BUT RESULT IS MIN_REGEX_MATCH.\n");
   }
 }/*}}}*/
 // partialチェック関数/*{{{*/
@@ -82,8 +82,8 @@ static void is_partial_valid(const int line, const char* regex_str, const char* 
   }
   if (trial != answer) {
     fprintf(stderr, "LINE:%04d [\x1b[31mX\x1b[39m] (%s) \x1b[41m%15s       \"%s\"\x1b[49m", line, partial, regex_str, match_str);
-    if (answer) fprintf(stderr, "  SHOULD BE MATCH BUT RESULT IS UNMATCH.\n");
-    else        fprintf(stderr, "  SHOULD BE UNMATCH BUT RESULT IS MATCH.\n");
+    if (answer) fprintf(stderr, "  SHOULD BE MIN_REGEX_MATCH BUT RESULT IS UNMIN_REGEX_MATCH.\n");
+    else        fprintf(stderr, "  SHOULD BE UNMIN_REGEX_MATCH BUT RESULT IS MIN_REGEX_MATCH.\n");
   }
 }/*}}}*/
 

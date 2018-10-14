@@ -1,6 +1,5 @@
-#ifndef __PRE__
-#define __PRE__
-#include "common.h"
+#ifndef __MIN_REGEX_PRE__
+#define __MIN_REGEX_PRE__
 #include <stdio.h>
 #include <stdbool.h>
 
