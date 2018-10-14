@@ -6,12 +6,14 @@
 int correct  = 0;
 int question = 0;
 
-static bool is_match(const char* regex_str, const char* match_str, const int option);
+static bool is_exact_match(const char* regex_str, const char* match_str);
+static int partial_match_index(const char* regex_str, const char* match_str, const char direction, const char length);
+static char* direction_length_to_message(const char direction, const char length);
 static void is_valid(const int line, const char* regex_str, const char* match_str, const bool answer);
-static void is_partial_valid(const int line, const char* regex_str, const char* match_str, const bool answer, const bool is_forward, const bool is_short);
+static void is_partial_valid(const int line, const char* regex_str, const char* match_str, const int match_index, const char direction, const char length);
 
 // マッチ関数/*{{{*/
-static bool is_match(const char* regex_str, const char* match_str, const int option) {
+static bool is_exact_match(const char* regex_str, const char* match_str) {
   char simple_regex[200];
   int current = 0;
   simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
@@ -20,14 +22,7 @@ static bool is_match(const char* regex_str, const char* match_str, const int opt
   regex_to_all_node(simple_regex, node, 200);
   MIN_REGEX_MATCH match[200];
 
-  int step;
-  if      (option == 0) step = exact_match(            match_str, node, match, 200);
-  else if (option == 1) step = forward_shortest_match( match_str, node, match, 200);
-  else if (option == 2) step = forward_longest_match(  match_str, node, match, 200);
-  else if (option == 3) step = backward_shortest_match(match_str, node, match, 200);
-  else if (option == 4) step = backward_longest_match( match_str, node, match, 200);
-  else assert(0);
-
+  const int step = exact_match(match_str, node, match, 200);
   bool ret;
   if (step > 0) {
     ret = true;
@@ -38,10 +33,35 @@ static bool is_match(const char* regex_str, const char* match_str, const int opt
   return ret;
 }
 /*}}}*/
+// マッチ関数/*{{{*/
+static int partial_match_index(const char* regex_str, const char* match_str, const char direction, const char length) {
+  char simple_regex[200];
+  int current = 0;
+  simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
+  simple_regex[current] = '\0';
+  MIN_REGEX_NODE node[200];
+  regex_to_all_node(simple_regex, node, 200);
+  MIN_REGEX_MATCH match[200];
+
+  if      ( direction == 'f' && length == 's') return forward_shortest_match( match_str, node, match, 200);
+  else if ( direction == 'f' && length == 'l') return forward_longest_match(  match_str, node, match, 200);
+  else if ( direction == 'b' && length == 's') return backward_shortest_match(match_str, node, match, 200);
+  else if ( direction == 'b' && length == 'l') return backward_longest_match( match_str, node, match, 200);
+  else return -2;
+}
+/*}}}*/
+// directionとlengthを正式名称にする関数/*{{{*/
+static char* direction_length_to_message(const char direction, const char length) {
+  if      ( direction == 'f' && length == 's') return "forward  shortest";
+  else if ( direction == 'f' && length == 'l') return "forward  longest ";
+  else if ( direction == 'b' && length == 's') return "backward shortest";
+  else if ( direction == 'b' && length == 'l') return "backward longest ";
+  else return "";
+}/*}}}*/
 // exactチェック関数/*{{{*/
 static void is_valid(const int line, const char* regex_str, const char* match_str, const bool answer) {
   question++;
-  bool trial = is_match(regex_str, match_str, 0); // 0はexact match
+  bool trial = is_exact_match(regex_str, match_str);
   if (trial == answer) {
     // fprintf(stderr, "LINE:%04d [\x1b[32mO\x1b[39m] %15s       \"%s\"\n"                , line, regex_str, match_str);
     correct++;
@@ -53,35 +73,17 @@ static void is_valid(const int line, const char* regex_str, const char* match_st
   }
 }/*}}}*/
 // partialチェック関数/*{{{*/
-static void is_partial_valid(const int line, const char* regex_str, const char* match_str, const bool answer, const bool is_forward, const bool is_short) {
+static void is_partial_valid(const int line, const char* regex_str, const char* match_str, const int match_index, const char direction, const char length) {
   question++;
-  const char *partial;
-  bool trial;
+  char *message = direction_length_to_message(direction, length);
+  int trial_index = partial_match_index(regex_str, match_str, direction, length);
 
-  if        ( is_forward &&  is_short) {
-    partial = "forward  shortest";
-    trial = is_match(regex_str, match_str, 1);
-  } else if ( is_forward && !is_short) {
-    partial = "forward  longest ";
-    trial = is_match(regex_str, match_str, 2);
-  } else if (!is_forward &&  is_short) {
-    partial = "backward shortest";
-    trial = is_match(regex_str, match_str, 3);
-  } else if (!is_forward && !is_short) {
-    partial = "backward longest ";
-    trial = is_match(regex_str, match_str, 4);
-  } else {
-    assert(0);
-  }
-
-  if (trial == answer) {
-    // fprintf(stderr, "LINE:%04d [\x1b[32mO\x1b[39m] (%s) %15s       \"%s\"\n"              , line, partial, regex_str, match_str);
+  if (trial_index == match_index) {
+    // fprintf(stderr, "LINE:%04d [\x1b[32mO\x1b[39m] (%s) EXPECT IDNEX:%2d RESULT INDEX:%2d %15s \"%s\"\n"              , line, message, match_index, trial_index, regex_str, match_str);
     correct++;
   }
-  if (trial != answer) {
-    fprintf(stderr, "LINE:%04d [\x1b[31mX\x1b[39m] (%s) \x1b[41m%15s       \"%s\"\x1b[49m", line, partial, regex_str, match_str);
-    if (answer) fprintf(stderr, "  SHOULD BE MIN_REGEX_MATCH BUT RESULT IS UNMIN_REGEX_MATCH.\n");
-    else        fprintf(stderr, "  SHOULD BE UNMIN_REGEX_MATCH BUT RESULT IS MIN_REGEX_MATCH.\n");
+  if (trial_index != match_index) {
+    fprintf(stderr, "LINE:%04d [\x1b[31mX\x1b[39m] (%s) EXPECT IDNEX:%2d RESULT INDEX:%2d \x1b[41m%15s \"%s\"\x1b[49m\n", line, message, match_index, trial_index, regex_str, match_str);
   }
 }/*}}}*/
 
@@ -1682,96 +1684,96 @@ int main(void) {
   is_valid(__LINE__, "(ab\\()"  , "abab(", false);/*}}}*/
 
   // 部分マッチ。引数の最後2つはis_forwardとis_short
-  is_partial_valid(__LINE__, ""       , ""        , false, true , true );/*{{{*/
-  is_partial_valid(__LINE__, ""       , "a"       , false, true , true );
-  is_partial_valid(__LINE__, ""       , "ab"      , false, true , true );
-  is_partial_valid(__LINE__, ""       , "ba"      , false, true , true );
-  is_partial_valid(__LINE__, ""       , "bab"     , false, true , true );
-  is_partial_valid(__LINE__, ""       , "abab"    , false, true , true );
-  is_partial_valid(__LINE__, ""       , "baba"    , false, true , true );
-  is_partial_valid(__LINE__, ""       , ""        , false, true , false);
-  is_partial_valid(__LINE__, ""       , "a"       , false, true , false);
-  is_partial_valid(__LINE__, ""       , "ab"      , false, true , false);
-  is_partial_valid(__LINE__, ""       , "ba"      , false, true , false);
-  is_partial_valid(__LINE__, ""       , "bab"     , false, true , false);
-  is_partial_valid(__LINE__, ""       , "abab"    , false, true , false);
-  is_partial_valid(__LINE__, ""       , "baba"    , false, true , false);
-  is_partial_valid(__LINE__, ""       , ""        , false, false, true );
-  is_partial_valid(__LINE__, ""       , "a"       , false, false, true );
-  is_partial_valid(__LINE__, ""       , "ab"      , false, false, true );
-  is_partial_valid(__LINE__, ""       , "ba"      , false, false, true );
-  is_partial_valid(__LINE__, ""       , "bab"     , false, false, true );
-  is_partial_valid(__LINE__, ""       , "abab"    , false, false, true );
-  is_partial_valid(__LINE__, ""       , "baba"    , false, false, true );
-  is_partial_valid(__LINE__, ""       , ""        , false, false, false);
-  is_partial_valid(__LINE__, ""       , "a"       , false, false, false);
-  is_partial_valid(__LINE__, ""       , "ab"      , false, false, false);
-  is_partial_valid(__LINE__, ""       , "ba"      , false, false, false);
-  is_partial_valid(__LINE__, ""       , "bab"     , false, false, false);
-  is_partial_valid(__LINE__, ""       , "abab"    , false, false, false);
-  is_partial_valid(__LINE__, ""       , "baba"    , false, false, false);
+  is_partial_valid(__LINE__, ""       , ""        , -1 ,'f','s');/*{{{*/
+  is_partial_valid(__LINE__, ""       , "a"       , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , "ab"      , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , "ba"      , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , "bab"     , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , "abab"    , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , "baba"    , -1 ,'f','s');
+  is_partial_valid(__LINE__, ""       , ""        , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "a"       , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "ab"      , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "ba"      , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "bab"     , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "abab"    , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , "baba"    , -1 ,'f','l');
+  is_partial_valid(__LINE__, ""       , ""        , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "a"       , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "ab"      , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "ba"      , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "bab"     , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "abab"    , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , "baba"    , -1 ,'b','s');
+  is_partial_valid(__LINE__, ""       , ""        , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "a"       , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "ab"      , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "ba"      , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "bab"     , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "abab"    , -1 ,'b','l');
+  is_partial_valid(__LINE__, ""       , "baba"    , -1 ,'b','l');
 
-  is_partial_valid(__LINE__, "a"      , ""        , false, true , true );
-  is_partial_valid(__LINE__, "a"      , "a"       , true , true , true );
-  is_partial_valid(__LINE__, "a"      , "ab"      , true , true , true );
-  is_partial_valid(__LINE__, "a"      , "ba"      , false, true , true );
-  is_partial_valid(__LINE__, "a"      , "bab"     , false, true , true );
-  is_partial_valid(__LINE__, "a"      , "abab"    , true , true , true );
-  is_partial_valid(__LINE__, "a"      , "baba"    , false, true , true );
-  is_partial_valid(__LINE__, "a"      , ""        , false, true , false);
-  is_partial_valid(__LINE__, "a"      , "a"       , true , true , false);
-  is_partial_valid(__LINE__, "a"      , "ab"      , true , true , false);
-  is_partial_valid(__LINE__, "a"      , "ba"      , false, true , false);
-  is_partial_valid(__LINE__, "a"      , "bab"     , false, true , false);
-  is_partial_valid(__LINE__, "a"      , "abab"    , true , true , false);
-  is_partial_valid(__LINE__, "a"      , "baba"    , false, true , false);
-  is_partial_valid(__LINE__, "a"      , ""        , false, false, true );
-  is_partial_valid(__LINE__, "a"      , "a"       , true , false, true );
-  is_partial_valid(__LINE__, "a"      , "ab"      , false, false, true );
-  is_partial_valid(__LINE__, "a"      , "ba"      , true , false, true );
-  is_partial_valid(__LINE__, "a"      , "bab"     , false, false, true );
-  is_partial_valid(__LINE__, "a"      , "abab"    , false, false, true );
-  is_partial_valid(__LINE__, "a"      , "baba"    , true , false, true );
-  is_partial_valid(__LINE__, "a"      , ""        , false, false, false);
-  is_partial_valid(__LINE__, "a"      , "a"       , true , false, false);
-  is_partial_valid(__LINE__, "a"      , "ab"      , false, false, false);
-  is_partial_valid(__LINE__, "a"      , "ba"      , true , false, false);
-  is_partial_valid(__LINE__, "a"      , "bab"     , false, false, false);
-  is_partial_valid(__LINE__, "a"      , "abab"    , false, false, false);
-  is_partial_valid(__LINE__, "a"      , "baba"    , true , false, false);
+  is_partial_valid(__LINE__, "a"      , ""        , -1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "a"       ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "ab"      ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "ba"      , -1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "bab"     , -1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "abab"    ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , "baba"    , -1 ,'f','s');
+  is_partial_valid(__LINE__, "a"      , ""        , -1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "a"       ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "ab"      ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "ba"      , -1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "bab"     , -1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "abab"    ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , "baba"    , -1 ,'f','l');
+  is_partial_valid(__LINE__, "a"      , ""        , -1 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "a"       ,  0 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "ab"      , -1 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "ba"      ,  1 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "bab"     , -1 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "abab"    , -1 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , "baba"    ,  3 ,'b','s');
+  is_partial_valid(__LINE__, "a"      , ""        , -1 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "a"       ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "ab"      , -1 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "ba"      ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "bab"     , -1 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "abab"    , -1 ,'b','l');
+  is_partial_valid(__LINE__, "a"      , "baba"    ,  3 ,'b','l');
 
-  is_partial_valid(__LINE__, "ab"     , ""        , false, true , true );
-  is_partial_valid(__LINE__, "ab"     , "a"       , false, true , true );
-  is_partial_valid(__LINE__, "ab"     , "ab"      , true , true , true );
-  is_partial_valid(__LINE__, "ab"     , "ba"      , false, true , true );
-  is_partial_valid(__LINE__, "ab"     , "aba"     , true , true , true );
-  is_partial_valid(__LINE__, "ab"     , "bab"     , false, true , true );
-  is_partial_valid(__LINE__, "ab"     , "abab"    , true , true , true );
-  is_partial_valid(__LINE__, "ab"     , "baba"    , false, true , true );
-  is_partial_valid(__LINE__, "ab"     , ""        , false, true , false);
-  is_partial_valid(__LINE__, "ab"     , "a"       , false, true , false);
-  is_partial_valid(__LINE__, "ab"     , "ab"      , true , true , false);
-  is_partial_valid(__LINE__, "ab"     , "ba"      , false, true , false);
-  is_partial_valid(__LINE__, "ab"     , "aba"     , true , true , false);
-  is_partial_valid(__LINE__, "ab"     , "bab"     , false, true , false);
-  is_partial_valid(__LINE__, "ab"     , "abab"    , true , true , false);
-  is_partial_valid(__LINE__, "ab"     , "baba"    , false, true , false);
-  is_partial_valid(__LINE__, "ab"     , ""        , false, false, true );
-  is_partial_valid(__LINE__, "ab"     , "a"       , false, false, true );
-  is_partial_valid(__LINE__, "ab"     , "ab"      , true , false, true );
-  is_partial_valid(__LINE__, "ab"     , "ba"      , false, false, true );
-  is_partial_valid(__LINE__, "ab"     , "aba"     , false, false, true );
-  is_partial_valid(__LINE__, "ab"     , "bab"     , true , false, true );
-  is_partial_valid(__LINE__, "ab"     , "abab"    , true , false, true );
-  is_partial_valid(__LINE__, "ab"     , "baba"    , false, false, true );
-  is_partial_valid(__LINE__, "ab"     , ""        , false, false, false);
-  is_partial_valid(__LINE__, "ab"     , "a"       , false, false, false);
-  is_partial_valid(__LINE__, "ab"     , "ab"      , true , false, false);
-  is_partial_valid(__LINE__, "ab"     , "ba"      , false, false, false);
-  is_partial_valid(__LINE__, "ab"     , "aba"     , false, false, false);
-  is_partial_valid(__LINE__, "ab"     , "bab"     , true , false, false);
-  is_partial_valid(__LINE__, "ab"     , "abab"    , true , false, false);
-  is_partial_valid(__LINE__, "ab"     , "baba"    , false, false, false);/*}}}*/
+  is_partial_valid(__LINE__, "ab"     , ""        , -1 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "a"       , -1 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "ab"      ,  2 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "ba"      , -1 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "aba"     ,  2 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "bab"     , -1 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "abab"    ,  2 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , "baba"    , -1 ,'f','s');
+  is_partial_valid(__LINE__, "ab"     , ""        , -1 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "a"       , -1 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "ab"      ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "ba"      , -1 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "aba"     ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "bab"     , -1 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "abab"    ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , "baba"    , -1 ,'f','l');
+  is_partial_valid(__LINE__, "ab"     , ""        , -1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "a"       , -1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "ab"      ,  0 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "ba"      , -1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "aba"     , -1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "bab"     ,  1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "abab"    ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , "baba"    , -1 ,'b','s');
+  is_partial_valid(__LINE__, "ab"     , ""        , -1 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "a"       , -1 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "ab"      ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "ba"      , -1 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "aba"     , -1 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "bab"     ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "abab"    ,  2 ,'b','l');
+  is_partial_valid(__LINE__, "ab"     , "baba"    , -1 ,'b','l');/*}}}*/
 
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;

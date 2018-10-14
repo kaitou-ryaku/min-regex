@@ -31,38 +31,50 @@ extern int exact_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_M
   return step;
 }/*}}}*/
 extern int forward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
-  int step;
+  int ret = -1;
   for (int end=0; end<=strlen(str); end++) {
-    step = arbitary_match(0, end, str, node, match, match_list_size);
-    if (step > 0) break;
+    const int step = arbitary_match(0, end, str, node, match, match_list_size);
+    if (step > 0) {
+      ret = end;
+      break;
+    }
   }
-  return step;
+  return ret;
 }/*}}}*/
 extern int forward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
-  int step;
+  int ret = -1;
   for (int rest=0; rest<=strlen(str); rest++) {
-    int end = strlen(str) - rest;
-    step = arbitary_match(0, end, str, node, match, match_list_size);
-    if (step > 0) break;
+    const int end = strlen(str) - rest;
+    const int step = arbitary_match(0, end, str, node, match, match_list_size);
+    if (step > 0) {
+      ret = end;
+      break;
+    }
   }
-  return step;
+  return ret;
 }/*}}}*/
 extern int backward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
-  int step;
+  int ret = -1;
   for (int begin=0; begin<=strlen(str); begin++) {
-    step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
-    if (step > 0) break;
+    const int step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    if (step > 0) {
+      ret = begin;
+      break;
+    }
   }
-  return step;
+  return ret;
 }/*}}}*/
 extern int backward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
-  int step;
+  int ret = -1;
   for (int rest=0; rest<=strlen(str); rest++) {
-    int begin = strlen(str) - rest;
-    step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
-    if (step > 0) break;
+    const int begin = strlen(str) - rest;
+    const int step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    if (step > 0) {
+      ret = begin;
+      break;
+    }
   }
-  return step;
+  return ret;
 }/*}}}*/
 static int arbitary_match( const int begin, const int end, const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   // str[begin], str[begin+1], ..., str[end-1], (str[end]==\0)
