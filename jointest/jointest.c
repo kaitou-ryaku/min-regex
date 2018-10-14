@@ -1683,7 +1683,7 @@ int main(void) {
   is_valid(__LINE__, "(ab\\()"  , "aba(" , false);
   is_valid(__LINE__, "(ab\\()"  , "abab(", false);/*}}}*/
 
-  // 部分マッチ。引数の最後2つはis_forwardとis_short
+  // 部分マッチ
   is_partial_valid(__LINE__, ""       , ""        , -1 ,'f','s');/*{{{*/
   is_partial_valid(__LINE__, ""       , "a"       , -1 ,'f','s');
   is_partial_valid(__LINE__, ""       , "ab"      , -1 ,'f','s');
@@ -1774,6 +1774,75 @@ int main(void) {
   is_partial_valid(__LINE__, "ab"     , "bab"     ,  1 ,'b','l');
   is_partial_valid(__LINE__, "ab"     , "abab"    ,  2 ,'b','l');
   is_partial_valid(__LINE__, "ab"     , "baba"    , -1 ,'b','l');/*}}}*/
+
+  // 部分マッチとアスタリスク演算子
+  is_partial_valid(__LINE__, "a*"     , ""        ,  0 ,'f','s');/*{{{*/
+  is_partial_valid(__LINE__, "a*"     , "a"       ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "ab"      ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "ba"      ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "aa"      ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "aab"     ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "baa"     ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , "aba"     ,  0 ,'f','s');
+  is_partial_valid(__LINE__, "a*"     , ""        ,  0 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "a"       ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "ab"      ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "ba"      ,  0 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "aa"      ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "aab"     ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "baa"     ,  0 ,'f','l');
+  is_partial_valid(__LINE__, "a*"     , "aba"     ,  1 ,'f','l');
+
+  is_partial_valid(__LINE__, "a*"     , ""        ,  0 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "a"       ,  1 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "ab"      ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "ba"      ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "aa"      ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "aab"     ,  3 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "baa"     ,  3 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , "aba"     ,  3 ,'b','s');
+  is_partial_valid(__LINE__, "a*"     , ""        ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "a"       ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "ab"      ,  2 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "ba"      ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "aa"      ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "aab"     ,  3 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "baa"     ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "a*"     , "aba"     ,  2 ,'b','l');
+
+  is_partial_valid(__LINE__, "aa*"    , ""        , -1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "a"       ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "ab"      ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "ba"      , -1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "aa"      ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "aab"     ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "baa"     , -1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , "aba"     ,  1 ,'f','s');
+  is_partial_valid(__LINE__, "aa*"    , ""        , -1 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "a"       ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "ab"      ,  1 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "ba"      , -1 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "aa"      ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "aab"     ,  2 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "baa"     , -1 ,'f','l');
+  is_partial_valid(__LINE__, "aa*"    , "aba"     ,  1 ,'f','l');
+
+  is_partial_valid(__LINE__, "aa*"    , ""        , -1 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "a"       ,  0 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "ab"      , -1 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "ba"      ,  1 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "aa"      ,  1 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "aab"     , -1 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "baa"     ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , "aba"     ,  2 ,'b','s');
+  is_partial_valid(__LINE__, "aa*"    , ""        , -1 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "a"       ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "ab"      , -1 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "ba"      ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "aa"      ,  0 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "aab"     , -1 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "baa"     ,  1 ,'b','l');
+  is_partial_valid(__LINE__, "aa*"    , "aba"     ,  2 ,'b','l');/*}}}*/
 
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;
