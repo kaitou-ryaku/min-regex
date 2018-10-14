@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "../include/pre.h"
-#include "../include/node.h"
-#include "../include/match.h"
-#include "../include/print.h"
+#include "../include/min-regex.h"
 
 int main(int argc, const char **argv) {
   // コマンドラインから正規表現と比較文字列を取得

@@ -1,29 +1,35 @@
 CC      := gcc
 CFLAGS  := -std=c99 -O0 -Wall
 
-TARGET  := min-regex.out
-ALL_C   := $(wildcard src/*.c)
+ARCHIVE  := min-regex.a
+TARGET   := min-regex.out
+JOINTEST := jointest.out
+
 ALL_CH  := $(wildcard src/*.c include/*.h)
-ALL_O   := $(patsubst src/%.c,object/%.o,$(ALL_C))
+ALL_O   := $(patsubst src/%.c,object/%.o,$(wildcard src/*.c))
+ALL_CH_WITHOUT_MAIN := $(filter-out src/main.c,$(ALL_CH))
+ALL_O_WITHOUT_MAIN  := $(filter-out object/main.o,$(ALL_O))
 
-TARGET_T := jointest.out
-ALL_CT   := $(wildcard jointest/*.c)
-ALL_OT   := $(patsubst jointest/%.c,jointest/object/%.o,$(ALL_CT))
-ALL_TO   := $(filter-out object/main.o,$(ALL_O) $(patsubst jointest/%.c,jointest/object/%.o,$(ALL_CT)))
+dummy: $(TARGET)
+test: $(JOINTEST)
 
-dummy: $(ALL_CH) $(ALL_CT)
-	cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
-	$(CC) $(CFLAGS) $(ALL_O) -o $(TARGET)
-	cd jointest/object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
-	$(CC) $(CFLAGS) $(ALL_TO) -o $(TARGET_T)
-#	./jointest.out
+$(ALL_O_WITHOUT_MAIN): $(ALL_CH_WITHOUT_MAIN)
+	cd object && $(MAKE) $(patsubst object/%.o,%.o,$@) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 
-notest: $(ALL_CH)
-	cd object && $(MAKE) "CC=$(CC)" "CFLAGS=$(CFLAGS)"
-	$(CC) $(CFLAGS) $(ALL_O) -o $(TARGET)
+$(ARCHIVE): $(ALL_O_WITHOUT_MAIN)
+	ar -r $@ $^
+
+$(TARGET): $(ARCHIVE) src/main.c
+	cd object && $(MAKE) main.o "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+	$(CC) $(CFLAGS) object/main.o $< -o $@
+
+$(JOINTEST): $(ARCHIVE) jointest/jointest.c
+	cd jointest/object && $(MAKE) jointest.o "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+	$(CC) $(CFLAGS) jointest/object/jointest.o $< -o $@
+#	./$@
 
 .PHONY: clean
 clean:
-	rm -rf *.out *.stackdump *.dot *.png
+	rm -rf *.a *.out *.stackdump *.dot *.png
 	cd object && rm -rf *.o *.d
 	cd jointest/object && rm -rf *.o *.d

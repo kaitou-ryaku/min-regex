@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "../include/pre.h"
-#include "../include/node.h"
-#include "../include/match.h"
+#include "../include/min-regex.h"
 
 int correct  = 0;
 int question = 0;
