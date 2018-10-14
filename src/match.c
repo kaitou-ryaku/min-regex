@@ -9,7 +9,8 @@
 static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
 static void initialize_match( MATCH* match, const int match_list_size);
-static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
+static int arbitary_match( const int begin, const int end, const char* str, const NODE* node, MATCH *match, const int match_list_size);
+static void match_str( const char* str, const int str_length, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back);
 static int find_back_node(const NODE* node, const MATCH* match, const int step);
 /*}}}*/
 // デバッグ用プロトタイプ/*{{{*/
@@ -25,21 +26,69 @@ static void initialize_match( MATCH* match, const int match_list_size) {/*{{{*/
     match[i].str_index  = -1;    // 文字列の添字番号。
   }
 }/*}}}*/
-extern int match_all_str( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
-  initialize_match(match, match_list_size);
+extern int exact_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  int step = arbitary_match(0, strlen(str), str, node, match, match_list_size);
+  return step;
+}/*}}}*/
+extern int forward_shortest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  int step;
+  for (int end=0; end<=strlen(str); end++) {
+    step = arbitary_match(0, end, str, node, match, match_list_size);
+    if (step > 0) break;
+  }
+  return step;
+}/*}}}*/
+extern int forward_longest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  int step;
+  for (int rest=0; rest<=strlen(str); rest++) {
+    int end = strlen(str) - rest;
+    step = arbitary_match(0, end, str, node, match, match_list_size);
+    if (step > 0) break;
+  }
+  return step;
+}/*}}}*/
+extern int backward_longest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  int step;
+  for (int begin=0; begin<=strlen(str); begin++) {
+    step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    if (step > 0) break;
+  }
+  return step;
+}/*}}}*/
+extern int backward_shortest_match( const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  int step;
+  for (int rest=0; rest<=strlen(str); rest++) {
+    int begin = strlen(str) - rest;
+    step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    if (step > 0) break;
+  }
+  return step;
+}/*}}}*/
+static int arbitary_match( const int begin, const int end, const char* str, const NODE* node, MATCH *match, const int match_list_size) {/*{{{*/
+  // str[begin], str[begin+1], ..., str[end-1], (str[end]==\0)
+  // と完全一致すれば、埋まったmatch[]配列のサイズを返す
 
+  assert(0 <= begin);
+  assert(end <= strlen(str));
+  assert(begin <= end);
+
+  const char* str_begin  = &(str[begin]);
+  const int   str_length = end - begin;
+
+  initialize_match(match, match_list_size);
   int step = 0;
-  // 0ステップ目は、str[-1]に対応する空文字を^にマッチしたと考える
+
+  // 0ステップ目は、str_begin[-1]に対応する空文字を^にマッチしたと考える
   match[step].node_index = 0;  // node '^'
   match[step].str_index  = -1;
 
   int seek = 0;
   // 再帰呼出の末尾でseekが再び0になると、アンマッチで終了
-  match_str(str, &seek, node, match, &step, match_list_size, false);
+  match_str(str_begin, str_length, &seek, node, match, &step, match_list_size, false);
 
   return step;
 }/*}}}*/
-static void match_str( const char* str, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
+static void match_str( const char* str, const int str_length, int* seek, const NODE* node, MATCH *match, int* step, const int match_list_size, const bool is_back) {/*{{{*/
   // 一時的に画像を書き出し
   // debug_print_match_str_dot(node, match, *(step));
   // debug_print_match_str_args(str, seek, node, match, step, match_list_size, is_back);
@@ -74,17 +123,17 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_fst;
-      match_str( str, seek, node, match, step, match_list_size, false);
+      match_str( str, str_length, seek, node, match, step, match_list_size, false);
 
     // グラフが$でない、バックトラックで訪問、fst のみ探索済みかつ、snd が空でない -> sndに行く
     } else if ((n.symbol != '$') && (!revisit_without_decrease) && (n.out_fst == match[(*step)+1].node_index) && (n.out_snd >= 0)) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       match[(*step)].node_index = n.out_snd;
-      match_str( str, seek, node, match, step, match_list_size, false);
+      match_str( str, str_length, seek, node, match, step, match_list_size, false);
 
     // グラフが$で、比較文字が文字が残ってない -> 終了
-    } else if ((n.symbol == '$') && ((*seek) == strlen(str))) {
+    } else if ((n.symbol == '$') && ((*seek) == str_length)) {
       match[(*step)].str_index  = -1;
       match[(*step)].str_index  = 1;
       (*step)++;
@@ -95,7 +144,7 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
     } else {
       (*step) = find_back_node( node, match, (*step));
       (*seek) = match[(*step)].str_index;
-      match_str( str, seek, node, match, step, match_list_size, true);
+      match_str( str, str_length, seek, node, match, step, match_list_size, true);
     }
 
   // 文字のノードにいる場合、マッチの成否を調べる
@@ -107,13 +156,13 @@ static void match_str( const char* str, int* seek, const NODE* node, MATCH *matc
       (*step)++;
       (*seek)++;
       match[(*step)].node_index = n.out_fst;
-      match_str( str, seek, node, match, step, match_list_size, false);
+      match_str( str, str_length, seek, node, match, step, match_list_size, false);
 
     // マッチ失敗 -> バックトラック
     } else {
       (*step) = find_back_node( node, match, (*step));
       (*seek) = match[(*step)].str_index;
-      match_str( str, seek, node, match, step, match_list_size, true);
+      match_str( str, str_length, seek, node, match, step, match_list_size, true);
     }
 
   }

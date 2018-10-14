@@ -8,10 +8,10 @@
 int correct  = 0;
 int question = 0;
 
-static bool is_match(const char* regex_str, const char* match_str);
+static bool is_match(const char* regex_str, const char* match_str, const int option);
 static void is_valid(const char* regex_str, const char* match_str, const bool answer);
 // マッチ関数/*{{{*/
-static bool is_match(const char* regex_str, const char* match_str) {
+static bool is_match(const char* regex_str, const char* match_str, const int option) {
   char simple_regex[200];
   int current = 0;
   simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
@@ -19,7 +19,14 @@ static bool is_match(const char* regex_str, const char* match_str) {
   NODE node[200];
   regex_to_all_node(simple_regex, node, 200);
   MATCH match[200];
-  const int step = match_all_str(match_str, node, match, 200);
+
+  int step;
+  if      (option == 0) step = exact_match(            match_str, node, match, 200);
+  else if (option == 1) step = forward_shortest_match( match_str, node, match, 200);
+  else if (option == 2) step = forward_longest_match(  match_str, node, match, 200);
+  else if (option == 3) step = backward_shortest_match(match_str, node, match, 200);
+  else if (option == 4) step = backward_longest_match( match_str, node, match, 200);
+  else assert(0);
 
   bool ret;
   if (step > 0) {
@@ -31,16 +38,48 @@ static bool is_match(const char* regex_str, const char* match_str) {
   return ret;
 }
 /*}}}*/
-// チェック関数/*{{{*/
+// exactチェック関数/*{{{*/
 static void is_valid(const char* regex_str, const char* match_str, const bool answer) {
   question++;
-  bool trial = is_match(regex_str, match_str);
+  bool trial = is_match(regex_str, match_str, 0); // 0はexact match
   if (trial == answer) {
     // fprintf(stderr, "%04d [\x1b[32mO\x1b[39m] %15s       \"%s\"\n"                , question, regex_str, match_str);
     correct++;
   }
   if (trial != answer) {
     fprintf(stderr, "%04d [\x1b[31mX\x1b[39m] \x1b[41m%15s       \"%s\"\x1b[49m", question, regex_str, match_str);
+    if (answer) fprintf(stderr, "  SHOULD BE MATCH BUT RESULT IS UNMATCH.\n");
+    else        fprintf(stderr, "  SHOULD BE UNMATCH BUT RESULT IS MATCH.\n");
+  }
+}/*}}}*/
+// partialチェック関数/*{{{*/
+static void is_partial_valid(const char* regex_str, const char* match_str, const bool answer, const bool is_forward, const bool is_short) {
+  question++;
+  const char *partial;
+  bool trial;
+
+  if        ( is_forward &&  is_short) {
+    partial = "forward  shortest";
+    trial = is_match(regex_str, match_str, 1);
+  } else if ( is_forward && !is_short) {
+    partial = "forward  longest ";
+    trial = is_match(regex_str, match_str, 2);
+  } else if (!is_forward &&  is_short) {
+    partial = "backward shortest";
+    trial = is_match(regex_str, match_str, 3);
+  } else if (!is_forward && !is_short) {
+    partial = "backward longest ";
+    trial = is_match(regex_str, match_str, 4);
+  } else {
+    assert(0);
+  }
+
+  if (trial == answer) {
+    // fprintf(stderr, "%04d [\x1b[32mO\x1b[39m] (%s) %15s       \"%s\"\n"              , question, partial, regex_str, match_str);
+    correct++;
+  }
+  if (trial != answer) {
+    fprintf(stderr, "%04d [\x1b[31mX\x1b[39m] (%s) \x1b[41m%15s       \"%s\"\x1b[49m", question, partial, regex_str, match_str);
     if (answer) fprintf(stderr, "  SHOULD BE MATCH BUT RESULT IS UNMATCH.\n");
     else        fprintf(stderr, "  SHOULD BE UNMATCH BUT RESULT IS MATCH.\n");
   }
@@ -1641,6 +1680,74 @@ int main(void) {
   is_valid("(ab\\()"  , "ab("  , true );
   is_valid("(ab\\()"  , "aba(" , false);
   is_valid("(ab\\()"  , "abab(", false);/*}}}*/
+
+  // 部分マッチ。引数の最後2つはis_forwardとis_short
+  is_partial_valid(""       , ""        , false, true , true );/*{{{*/
+  is_partial_valid(""       , "a"       , false, true , true );
+  is_partial_valid(""       , "ab"      , false, true , true );
+  is_partial_valid(""       , "ba"      , false, true , true );
+  is_partial_valid(""       , "bab"     , false, true , true );
+  is_partial_valid(""       , ""        , false, true , false);
+  is_partial_valid(""       , "a"       , false, true , false);
+  is_partial_valid(""       , "ab"      , false, true , false);
+  is_partial_valid(""       , "ba"      , false, true , false);
+  is_partial_valid(""       , "bab"     , false, true , false);
+  is_partial_valid(""       , ""        , false, false, true );
+  is_partial_valid(""       , "a"       , false, false, true );
+  is_partial_valid(""       , "ab"      , false, false, true );
+  is_partial_valid(""       , "ba"      , false, false, true );
+  is_partial_valid(""       , "bab"     , false, false, true );
+  is_partial_valid(""       , ""        , false, false, false);
+  is_partial_valid(""       , "a"       , false, false, false);
+  is_partial_valid(""       , "ab"      , false, false, false);
+  is_partial_valid(""       , "ba"      , false, false, false);
+  is_partial_valid(""       , "bab"     , false, false, false);
+
+  is_partial_valid("a"      , ""        , false, true , true );
+  is_partial_valid("a"      , "a"       , true , true , true );
+  is_partial_valid("a"      , "ab"      , true , true , true );
+  is_partial_valid("a"      , "ba"      , false, true , true );
+  is_partial_valid("a"      , "bab"     , false, true , true );
+  is_partial_valid("a"      , ""        , false, true , false);
+  is_partial_valid("a"      , "a"       , true , true , false);
+  is_partial_valid("a"      , "ab"      , true , true , false);
+  is_partial_valid("a"      , "ba"      , false, true , false);
+  is_partial_valid("a"      , "bab"     , false, true , false);
+  is_partial_valid("a"      , ""        , false, false, true );
+  is_partial_valid("a"      , "a"       , true , false, true );
+  is_partial_valid("a"      , "ab"      , false, false, true );
+  is_partial_valid("a"      , "ba"      , true , false, true );
+  is_partial_valid("a"      , "bab"     , false, false, true );
+  is_partial_valid("a"      , ""        , false, false, false);
+  is_partial_valid("a"      , "a"       , true , false, false);
+  is_partial_valid("a"      , "ab"      , false, false, false);
+  is_partial_valid("a"      , "ba"      , true , false, false);
+  is_partial_valid("a"      , "bab"     , false, false, false);
+
+  is_partial_valid("ab"     , ""        , false, true , true );
+  is_partial_valid("ab"     , "a"       , false, true , true );
+  is_partial_valid("ab"     , "ab"      , true , true , true );
+  is_partial_valid("ab"     , "ba"      , false, true , true );
+  is_partial_valid("ab"     , "aba"     , true , true , true );
+  is_partial_valid("ab"     , "bab"     , false, true , true );
+  is_partial_valid("ab"     , ""        , false, true , false);
+  is_partial_valid("ab"     , "a"       , false, true , false);
+  is_partial_valid("ab"     , "ab"      , true , true , false);
+  is_partial_valid("ab"     , "ba"      , false, true , false);
+  is_partial_valid("ab"     , "aba"     , true , true , false);
+  is_partial_valid("ab"     , "bab"     , false, true , false);
+  is_partial_valid("ab"     , ""        , false, false, true );
+  is_partial_valid("ab"     , "a"       , false, false, true );
+  is_partial_valid("ab"     , "ab"      , true , false, true );
+  is_partial_valid("ab"     , "ba"      , false, false, true );
+  is_partial_valid("ab"     , "aba"     , false, false, true );
+  is_partial_valid("ab"     , "bab"     , true , false, true );
+  is_partial_valid("ab"     , ""        , false, false, false);
+  is_partial_valid("ab"     , "a"       , false, false, false);
+  is_partial_valid("ab"     , "ab"      , true , false, false);
+  is_partial_valid("ab"     , "ba"      , false, false, false);
+  is_partial_valid("ab"     , "aba"     , false, false, false);
+  is_partial_valid("ab"     , "bab"     , true , false, false);/*}}}*/
 
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;

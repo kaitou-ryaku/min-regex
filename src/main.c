@@ -42,7 +42,8 @@ int main(int argc, const char **argv) {
   // オートマトンと比較文字列をマッチング
   fprintf(stderr, "compare  : %s\n", match_str);
   MATCH match[50];
-  const int step = match_all_str(match_str, node, match, 50);
+  // const int step = exact_match(match_str, node, match, 50);
+  const int step = forward_shortest_match(match_str, node, match, 50);
 
   // マッチ成功
   if (step > 0) {
