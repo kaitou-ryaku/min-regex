@@ -2,7 +2,8 @@
 #include <string.h>
 #include <assert.h>
 
-extern void simplify_regex( const char* original_regex, const int begin, const int end, char *simple_regex, int* current, const int size) {/*{{{*/
+static void simplify_regex_partial( const char* original_regex, const int begin, const int end, char *simple_regex, int* current, const int size);
+static void simplify_regex_partial( const char* original_regex, const int begin, const int end, char *simple_regex, int* current, const int size) {/*{{{*/
   const char c = original_regex[begin];
   // (...???...)/*{{{*/
   if (c == '(') {
@@ -16,7 +17,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     if (next_pipe < 0) {
       simple_regex[(*current)] = '(';
       (*current)++;
-      simplify_regex(original_regex, begin+1, end_pipe, simple_regex, current ,size);
+      simplify_regex_partial(original_regex, begin+1, end_pipe, simple_regex, current ,size);
       simple_regex[(*current)] = ')';
       (*current)++;
     }/*}}}*/
@@ -29,7 +30,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
         assert(pipe+1 < next_pipe);
         simple_regex[(*current)] = '(';
         (*current)++;
-        simplify_regex(original_regex, pipe+1, next_pipe, simple_regex, current ,size);
+        simplify_regex_partial(original_regex, pipe+1, next_pipe, simple_regex, current ,size);
         simple_regex[(*current)] = '|';
         (*current)++;
         pipe      = next_pipe;
@@ -37,7 +38,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
       }
 
       // |d) -> d
-      simplify_regex(original_regex, pipe+1, end_pipe, simple_regex, current ,size);
+      simplify_regex_partial(original_regex, pipe+1, end_pipe, simple_regex, current ,size);
 
       // 最後にパイプの数だけ)を書く
       pipe = search_inner_letter(original_regex, begin, '|', end_pipe);
@@ -49,7 +50,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     }/*}}}*/
     // (...???...)の続き/*{{{*/
     if (end_pipe+1 < end) {
-      simplify_regex( original_regex, end_pipe+1, end, simple_regex, current ,size);
+      simplify_regex_partial( original_regex, end_pipe+1, end, simple_regex, current ,size);
     }/*}}}*/
   }/*}}}*/
   // エスケープシーケンス ... この処理が無いと、メタ文字の(とエスケープされた(が区別できない/*{{{*/
@@ -58,7 +59,7 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     simple_regex[(*current)+1] = original_regex[begin+1];
     (*current) = (*current) + 2;
     if (begin+2 < end) {
-      simplify_regex( original_regex, begin+2, end, simple_regex, current ,size);
+      simplify_regex_partial( original_regex, begin+2, end, simple_regex, current ,size);
     }
   }/*}}}*/
   // 処理の不要な普通の文字/*{{{*/
@@ -66,7 +67,13 @@ extern void simplify_regex( const char* original_regex, const int begin, const i
     simple_regex[(*current)] = c;
     (*current)++;
     if (begin+1 < end) {
-      simplify_regex( original_regex, begin+1, end, simple_regex, current ,size);
+      simplify_regex_partial( original_regex, begin+1, end, simple_regex, current ,size);
     }
   }/*}}}*/
+}/*}}}*/
+extern void simplify_regex( const char* original_regex, char *simple_regex, const int size) {/*{{{*/
+  int current = 0;
+  simplify_regex_partial(original_regex, 0, strlen(original_regex), simple_regex, &current, size);
+  assert(current < size);
+  simple_regex[current] = '\0';
 }/*}}}*/

@@ -15,9 +15,7 @@ static void is_partial_valid(const int line, const char* regex_str, const char* 
 // マッチ関数/*{{{*/
 static bool is_exact_match(const char* regex_str, const char* match_str) {
   char simple_regex[200];
-  int current = 0;
-  simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
-  simple_regex[current] = '\0';
+  simplify_regex(regex_str, simple_regex, 200);
   MIN_REGEX_NODE node[200];
   regex_to_all_node(simple_regex, node, 200);
   MIN_REGEX_MATCH match[200];
@@ -36,9 +34,7 @@ static bool is_exact_match(const char* regex_str, const char* match_str) {
 // マッチ関数/*{{{*/
 static int partial_match_index(const char* regex_str, const char* match_str, const char direction, const char length) {
   char simple_regex[200];
-  int current = 0;
-  simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
-  simple_regex[current] = '\0';
+  simplify_regex(regex_str, simple_regex, 200);
   MIN_REGEX_NODE node[200];
   regex_to_all_node(simple_regex, node, 200);
   MIN_REGEX_MATCH match[200];

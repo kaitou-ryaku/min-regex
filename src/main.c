@@ -15,9 +15,7 @@ int main(int argc, const char **argv) {
 
   // 正規表現を簡約
   char simple_regex[200];
-  int current = 0;
-  simplify_regex(regex_str, 0, strlen(regex_str), simple_regex, &current, 200);
-  simple_regex[current] = '\0';
+  simplify_regex(regex_str, simple_regex, 200);
   fprintf(stderr, "simplify : %s\n", simple_regex);
 
   // 簡約された正規表現をオートマトンに変換
