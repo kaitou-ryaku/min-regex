@@ -9,7 +9,6 @@
 static int debug_id=0;
 // 関数プロトタイプ宣言/*{{{*/
 static void initialize_match( MIN_REGEX_MATCH* match, const int match_list_size);
-static int arbitary_match( const int begin, const int end, const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
 static void match_str( const char* str, const int str_length, int* seek, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, int* step, const int match_list_size, const bool is_back);
 static int find_back_node(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* match, const int step);
 /*}}}*/
@@ -27,13 +26,13 @@ static void initialize_match( MIN_REGEX_MATCH* match, const int match_list_size)
   }
 }/*}}}*/
 extern int exact_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
-  int step = arbitary_match(0, strlen(str), str, node, match, match_list_size);
+  int step = arbitary_match(str, 0, strlen(str), node, match, match_list_size);
   return step;
 }/*}}}*/
 extern int forward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int ret = -1;
   for (int end=0; end<=strlen(str); end++) {
-    const int step = arbitary_match(0, end, str, node, match, match_list_size);
+    const int step = arbitary_match(str, 0, end, node, match, match_list_size);
     if (step > 0) {
       ret = end;
       break;
@@ -45,7 +44,7 @@ extern int forward_longest_match( const char* str, const MIN_REGEX_NODE* node, M
   int ret = -1;
   for (int rest=0; rest<=strlen(str); rest++) {
     const int end = strlen(str) - rest;
-    const int step = arbitary_match(0, end, str, node, match, match_list_size);
+    const int step = arbitary_match(str, 0, end, node, match, match_list_size);
     if (step > 0) {
       ret = end;
       break;
@@ -56,7 +55,7 @@ extern int forward_longest_match( const char* str, const MIN_REGEX_NODE* node, M
 extern int backward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   int ret = -1;
   for (int begin=0; begin<=strlen(str); begin++) {
-    const int step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    const int step = arbitary_match(str, begin, strlen(str), node, match, match_list_size);
     if (step > 0) {
       ret = begin;
       break;
@@ -68,7 +67,7 @@ extern int backward_shortest_match( const char* str, const MIN_REGEX_NODE* node,
   int ret = -1;
   for (int rest=0; rest<=strlen(str); rest++) {
     const int begin = strlen(str) - rest;
-    const int step = arbitary_match(begin, strlen(str), str, node, match, match_list_size);
+    const int step = arbitary_match(str, begin, strlen(str), node, match, match_list_size);
     if (step > 0) {
       ret = begin;
       break;
@@ -76,7 +75,7 @@ extern int backward_shortest_match( const char* str, const MIN_REGEX_NODE* node,
   }
   return ret;
 }/*}}}*/
-static int arbitary_match( const int begin, const int end, const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
+extern int arbitary_match( const char* str, const int begin, const int end, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size) {/*{{{*/
   // str[begin], str[begin+1], ..., str[end-1], (str[end]==\0)
   // と完全一致すれば、埋まったmatch[]配列のサイズを返す
 

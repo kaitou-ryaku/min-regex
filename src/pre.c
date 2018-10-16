@@ -1,4 +1,5 @@
 #include "../include/textutil.h"
+#include "../include/pre.h"
 #include <string.h>
 #include <assert.h>
 
@@ -71,9 +72,13 @@ static void simplify_regex_partial( const char* original_regex, const int begin,
     }
   }/*}}}*/
 }/*}}}*/
-extern void simplify_regex( const char* original_regex, char *simple_regex, const int size) {/*{{{*/
+extern int simplify_regex( const char* original_regex, char *simple_regex, const int size) {/*{{{*/
+  return simplify_regex_arbitary( original_regex, 0, strlen(original_regex), simple_regex, size);
+}/*}}}*/
+extern int simplify_regex_arbitary( const char* original_regex, const int original_regex_begin, const int original_regex_end, char *simple_regex, const int size) {/*{{{*/
   int current = 0;
-  simplify_regex_partial(original_regex, 0, strlen(original_regex), simple_regex, &current, size);
+  simplify_regex_partial(original_regex, original_regex_begin, original_regex_end, simple_regex, &current, size);
   assert(current < size);
   simple_regex[current] = '\0';
+  return current+1;
 }/*}}}*/

@@ -9,5 +9,6 @@ int forward_shortest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REG
 int forward_longest_match(  const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
 int backward_shortest_match(const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
 int backward_longest_match( const char* str, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
+int arbitary_match( const char* str, const int begin, const int end, const MIN_REGEX_NODE* node, MIN_REGEX_MATCH *match, const int match_list_size);
 
 #endif
