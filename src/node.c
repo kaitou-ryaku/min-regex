@@ -26,7 +26,7 @@ static void debug_print_node_list(const MIN_REGEX_NODE *node, const int node_siz
 static void debug_print_regex_to_node_list_args(const char* regex_str, const int regex_begin, const int regex_end, const int regex_next, const int node_empty);
 /*}}}*/
 // 関数本体/*{{{*/
-extern void regex_to_all_node_arbitary(/*{{{*/
+extern int regex_to_all_node_arbitary(/*{{{*/
   const char*       regex_str
   , const int       regex_begin
   , const int       regex_end
@@ -66,8 +66,11 @@ extern void regex_to_all_node_arbitary(/*{{{*/
     node[i].self  = i;
     node[i].total = node_empty;
   }
+
+  // 作成されたノードの総数を返す
+  return node_empty;
 }/*}}}*/
-extern void regex_to_all_node(/*{{{*/
+extern int regex_to_all_node(/*{{{*/
   const char*       regex_str
   , MIN_REGEX_NODE* node
   , const int       node_list_size
@@ -75,7 +78,9 @@ extern void regex_to_all_node(/*{{{*/
   // node[0]の始点^と、node[1]の終点$を定義
   const int regex_begin = 0;
   const int regex_end   = strlen(regex_str);
-  regex_to_all_node_arbitary(regex_str, regex_begin, regex_end, node, node_list_size);
+
+  // 作成されたノードの総数を返す
+  return regex_to_all_node_arbitary(regex_str, regex_begin, regex_end, node, node_list_size);
 }/*}}}*/
 static void regex_to_node_list(/*{{{*/
   const char*       regex_str
