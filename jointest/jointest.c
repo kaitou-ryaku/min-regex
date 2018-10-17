@@ -1679,6 +1679,187 @@ int main(void) {
   is_valid(__LINE__, "(ab\\()"  , "aba(" , false);
   is_valid(__LINE__, "(ab\\()"  , "abab(", false);/*}}}*/
 
+  // 特殊文字
+  is_valid(__LINE__, "."    , ""     , false);/*{{{*/
+  is_valid(__LINE__, "."    , "a"    , true );
+  is_valid(__LINE__, "."    , "d"    , true );
+  is_valid(__LINE__, "."    , "l"    , true );
+  is_valid(__LINE__, "."    , "u"    , true );
+  is_valid(__LINE__, "."    , "s"    , true );
+  is_valid(__LINE__, "."    , "."    , true );
+  is_valid(__LINE__, "."    , "@"    , true );
+  is_valid(__LINE__, "."    , "A"    , true );
+  is_valid(__LINE__, "."    , "0"    , true );
+  is_valid(__LINE__, "."    , "1"    , true );
+  is_valid(__LINE__, "."    , "_"    , true );
+  is_valid(__LINE__, "."    , " "    , true );
+  is_valid(__LINE__, "."    , "\t"   , false);
+  is_valid(__LINE__, "."    , "\n"   , false);
+  is_valid(__LINE__, "."    , "\\"   , true );
+  is_valid(__LINE__, "."    , "aa"   , false);
+
+  is_valid(__LINE__, "d"    , ""     , false);
+  is_valid(__LINE__, "d"    , "a"    , false);
+  is_valid(__LINE__, "d"    , "d"    , true );
+  is_valid(__LINE__, "d"    , "l"    , false);
+  is_valid(__LINE__, "d"    , "u"    , false);
+  is_valid(__LINE__, "d"    , "s"    , false);
+  is_valid(__LINE__, "d"    , "."    , false);
+  is_valid(__LINE__, "d"    , "@"    , false);
+  is_valid(__LINE__, "d"    , "A"    , false);
+  is_valid(__LINE__, "d"    , "0"    , false);
+  is_valid(__LINE__, "d"    , "1"    , false);
+  is_valid(__LINE__, "d"    , "_"    , false);
+  is_valid(__LINE__, "d"    , " "    , false);
+  is_valid(__LINE__, "d"    , "\t"   , false);
+  is_valid(__LINE__, "d"    , "\n"   , false);
+  is_valid(__LINE__, "d"    , "\\"   , false);
+  is_valid(__LINE__, "d"    , "aa"   , false);
+
+  is_valid(__LINE__, "l"    , ""     , false);
+  is_valid(__LINE__, "l"    , "a"    , false);
+  is_valid(__LINE__, "l"    , "d"    , false);
+  is_valid(__LINE__, "l"    , "l"    , true );
+  is_valid(__LINE__, "l"    , "u"    , false);
+  is_valid(__LINE__, "l"    , "s"    , false);
+  is_valid(__LINE__, "l"    , "."    , false);
+  is_valid(__LINE__, "l"    , "@"    , false);
+  is_valid(__LINE__, "l"    , "A"    , false);
+  is_valid(__LINE__, "l"    , "0"    , false);
+  is_valid(__LINE__, "l"    , "1"    , false);
+  is_valid(__LINE__, "l"    , "_"    , false);
+  is_valid(__LINE__, "l"    , " "    , false);
+  is_valid(__LINE__, "l"    , "\t"   , false);
+  is_valid(__LINE__, "l"    , "\n"   , false);
+  is_valid(__LINE__, "l"    , "\\"   , false);
+  is_valid(__LINE__, "l"    , "aa"   , false);
+
+  is_valid(__LINE__, "u"    , ""     , false);
+  is_valid(__LINE__, "u"    , "a"    , false);
+  is_valid(__LINE__, "u"    , "d"    , false);
+  is_valid(__LINE__, "u"    , "l"    , false);
+  is_valid(__LINE__, "u"    , "u"    , true );
+  is_valid(__LINE__, "u"    , "s"    , false);
+  is_valid(__LINE__, "u"    , "."    , false);
+  is_valid(__LINE__, "u"    , "@"    , false);
+  is_valid(__LINE__, "u"    , "A"    , false);
+  is_valid(__LINE__, "u"    , "0"    , false);
+  is_valid(__LINE__, "u"    , "1"    , false);
+  is_valid(__LINE__, "u"    , "_"    , false);
+  is_valid(__LINE__, "u"    , " "    , false);
+  is_valid(__LINE__, "u"    , "\t"   , false);
+  is_valid(__LINE__, "u"    , "\n"   , false);
+  is_valid(__LINE__, "u"    , "\\"   , false);
+  is_valid(__LINE__, "u"    , "aa"   , false);
+
+  is_valid(__LINE__, "s"    , ""     , false);
+  is_valid(__LINE__, "s"    , "a"    , false);
+  is_valid(__LINE__, "s"    , "d"    , false);
+  is_valid(__LINE__, "s"    , "l"    , false);
+  is_valid(__LINE__, "s"    , "u"    , false);
+  is_valid(__LINE__, "s"    , "s"    , true );
+  is_valid(__LINE__, "s"    , "."    , false);
+  is_valid(__LINE__, "s"    , "@"    , false);
+  is_valid(__LINE__, "s"    , "A"    , false);
+  is_valid(__LINE__, "s"    , "0"    , false);
+  is_valid(__LINE__, "s"    , "1"    , false);
+  is_valid(__LINE__, "s"    , "_"    , false);
+  is_valid(__LINE__, "s"    , " "    , false);
+  is_valid(__LINE__, "s"    , "\t"   , false);
+  is_valid(__LINE__, "s"    , "\n"   , false);
+  is_valid(__LINE__, "s"    , "\\"   , false);
+  is_valid(__LINE__, "s"    , "aa"   , false);
+
+  is_valid(__LINE__, "\\."  , ""     , false);
+  is_valid(__LINE__, "\\."  , "a"    , false);
+  is_valid(__LINE__, "\\."  , "d"    , false);
+  is_valid(__LINE__, "\\."  , "l"    , false);
+  is_valid(__LINE__, "\\."  , "u"    , false);
+  is_valid(__LINE__, "\\."  , "s"    , false);
+  is_valid(__LINE__, "\\."  , "."    , true );
+  is_valid(__LINE__, "\\."  , "@"    , false);
+  is_valid(__LINE__, "\\."  , "A"    , false);
+  is_valid(__LINE__, "\\."  , "0"    , false);
+  is_valid(__LINE__, "\\."  , "1"    , false);
+  is_valid(__LINE__, "\\."  , "_"    , false);
+  is_valid(__LINE__, "\\."  , " "    , false);
+  is_valid(__LINE__, "\\."  , "\t"   , false);
+  is_valid(__LINE__, "\\."  , "\n"   , false);
+  is_valid(__LINE__, "\\."  , "\\"   , false);
+  is_valid(__LINE__, "\\."  , "aa"   , false);
+
+  is_valid(__LINE__, "\\d"  , ""     , false);
+  is_valid(__LINE__, "\\d"  , "a"    , false);
+  is_valid(__LINE__, "\\d"  , "d"    , false);
+  is_valid(__LINE__, "\\d"  , "l"    , false);
+  is_valid(__LINE__, "\\d"  , "u"    , false);
+  is_valid(__LINE__, "\\d"  , "s"    , false);
+  is_valid(__LINE__, "\\d"  , "."    , false);
+  is_valid(__LINE__, "\\d"  , "@"    , false);
+  is_valid(__LINE__, "\\d"  , "A"    , false);
+  is_valid(__LINE__, "\\d"  , "0"    , true );
+  is_valid(__LINE__, "\\d"  , "1"    , true );
+  is_valid(__LINE__, "\\d"  , "_"    , false);
+  is_valid(__LINE__, "\\d"  , " "    , false);
+  is_valid(__LINE__, "\\d"  , "\t"   , false);
+  is_valid(__LINE__, "\\d"  , "\n"   , false);
+  is_valid(__LINE__, "\\d"  , "\\"   , false);
+  is_valid(__LINE__, "\\d"  , "aa"   , false);
+
+  is_valid(__LINE__, "\\l"  , ""     , false);
+  is_valid(__LINE__, "\\l"  , "a"    , true );
+  is_valid(__LINE__, "\\l"  , "d"    , true );
+  is_valid(__LINE__, "\\l"  , "l"    , true );
+  is_valid(__LINE__, "\\l"  , "u"    , true );
+  is_valid(__LINE__, "\\l"  , "s"    , true );
+  is_valid(__LINE__, "\\l"  , "."    , false);
+  is_valid(__LINE__, "\\l"  , "@"    , false);
+  is_valid(__LINE__, "\\l"  , "A"    , false);
+  is_valid(__LINE__, "\\l"  , "0"    , false);
+  is_valid(__LINE__, "\\l"  , "1"    , false);
+  is_valid(__LINE__, "\\l"  , "_"    , false);
+  is_valid(__LINE__, "\\l"  , " "    , false);
+  is_valid(__LINE__, "\\l"  , "\t"   , false);
+  is_valid(__LINE__, "\\l"  , "\n"   , false);
+  is_valid(__LINE__, "\\l"  , "\\"   , false);
+  is_valid(__LINE__, "\\l"  , "aa"   , false);
+
+  is_valid(__LINE__, "\\u"  , ""     , false);
+  is_valid(__LINE__, "\\u"  , "a"    , false);
+  is_valid(__LINE__, "\\u"  , "d"    , false);
+  is_valid(__LINE__, "\\u"  , "l"    , false);
+  is_valid(__LINE__, "\\u"  , "u"    , false);
+  is_valid(__LINE__, "\\u"  , "s"    , false);
+  is_valid(__LINE__, "\\u"  , "."    , false);
+  is_valid(__LINE__, "\\u"  , "@"    , false);
+  is_valid(__LINE__, "\\u"  , "A"    , true );
+  is_valid(__LINE__, "\\u"  , "0"    , false);
+  is_valid(__LINE__, "\\u"  , "1"    , false);
+  is_valid(__LINE__, "\\u"  , "_"    , false);
+  is_valid(__LINE__, "\\u"  , " "    , false);
+  is_valid(__LINE__, "\\u"  , "\t"   , false);
+  is_valid(__LINE__, "\\u"  , "\n"   , false);
+  is_valid(__LINE__, "\\u"  , "\\"   , false);
+  is_valid(__LINE__, "\\u"  , "aa"   , false);
+
+  is_valid(__LINE__, "\\s"  , ""     , false);
+  is_valid(__LINE__, "\\s"  , "a"    , false);
+  is_valid(__LINE__, "\\s"  , "d"    , false);
+  is_valid(__LINE__, "\\s"  , "l"    , false);
+  is_valid(__LINE__, "\\s"  , "u"    , false);
+  is_valid(__LINE__, "\\s"  , "s"    , false);
+  is_valid(__LINE__, "\\s"  , "."    , false);
+  is_valid(__LINE__, "\\s"  , "@"    , false);
+  is_valid(__LINE__, "\\s"  , "A"    , false);
+  is_valid(__LINE__, "\\s"  , "0"    , false);
+  is_valid(__LINE__, "\\s"  , "1"    , false);
+  is_valid(__LINE__, "\\s"  , "_"    , false);
+  is_valid(__LINE__, "\\s"  , " "    , true );
+  is_valid(__LINE__, "\\s"  , "\t"   , true );
+  is_valid(__LINE__, "\\s"  , "\n"   , true );
+  is_valid(__LINE__, "\\s"  , "\\"   , false);
+  is_valid(__LINE__, "\\s"  , "aa"   , false);/*}}}*/
+
   // 部分マッチ
   is_partial_valid(__LINE__, ""       , ""        , -1 ,'f','s');/*{{{*/
   is_partial_valid(__LINE__, ""       , "a"       , -1 ,'f','s');

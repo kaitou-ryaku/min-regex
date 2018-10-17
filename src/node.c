@@ -195,18 +195,24 @@ static void regex_to_node_list(/*{{{*/
     } else if (c_begin == '\\') {
       assert(token_begin+2 == token_end);
       char symbol = regex_str[token_begin+1];
-      assert(is_magick(symbol));
+
+      if ((symbol == 'd') || (symbol == 'l') || (symbol == 'u') || (symbol == 's')) {
+        node[node_begin].is_magick = true;
+      } else if (is_magick(symbol)) {
+        node[node_begin].is_magick = false;
+      } else {
+        assert(0);
+      }
 
       node[node_begin].symbol       = symbol;
       node[node_begin].symbol_index = token_begin+1;
-      node[node_begin].is_magick    = false;
       (*node_in) = node_begin;
       node_end = node_begin;
       (*node_empty)++;
 
     // @
-    } else if (c_begin == '@'){
-      node[node_begin].symbol       = '@';
+    } else if (c_begin == '@' || c_begin == '.'){
+      node[node_begin].symbol       = c_begin;
       node[node_begin].symbol_index = token_begin;
       node[node_begin].is_magick    = true;
       (*node_in) = node_begin;

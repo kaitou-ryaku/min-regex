@@ -37,6 +37,6 @@ extern int search_inner_letter(const char* s, const int i, const char c, const i
   else return -1;
 }/*}}}*/
 extern bool is_magick(const char c) {/*{{{*/
-  if ((c == '(') || (c == '|') || (c == ')') || (c == '*') ||  (c == '@') || (c == '\\')) return true;
+  if ((c == '(') || (c == '|') || (c == ')') || (c == '*') ||  (c == '@') || (c == '.') || (c == '\\')) return true;
   else return false;
 }/*}}}*/

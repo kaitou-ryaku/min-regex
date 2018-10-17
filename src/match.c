@@ -1,6 +1,7 @@
 #include "../include/match.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 #include "../include/print.h"
 
@@ -118,7 +119,7 @@ static void match_str( const char* str, const int str_length, int* seek, const M
   const MIN_REGEX_NODE  n = node[m.node_index];
 
   // メタ文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
-  if (n.is_magick) {
+  if (n.is_magick && ((n.symbol == '*') || (n.symbol == '(') || (n.symbol == ')') || (n.symbol == '^') || (n.symbol == '$') || (n.symbol == '@'))) {
     // 文字列が減らないまま再訪したかチェック
     bool revisit_without_decrease = false;
     for (int i=0; i<(*step)-1; i++) {
@@ -161,8 +162,19 @@ static void match_str( const char* str, const int str_length, int* seek, const M
   // 文字のノードにいる場合、マッチの成否を調べる
   } else {
 
+    // 数字にマッチさせる
+    bool d_flag      = (n.is_magick && n.symbol == 'd' && isdigit(str[(*seek)]));
+    bool l_flag      = (n.is_magick && n.symbol == 'l' && islower(str[(*seek)]));
+    bool u_flag      = (n.is_magick && n.symbol == 'u' && isupper(str[(*seek)]));
+    bool s_flag      = (n.is_magick && n.symbol == 's' && isspace(str[(*seek)]));
+    bool dot_flag    = (n.is_magick && n.symbol == '.' && (isgraph(str[(*seek)]) || str[(*seek)] == ' '));
+    bool normal_flag = (!(n.is_magick) && str[(*seek)] == n.symbol);
+
+    // 空文字
+    if (n.is_magick && n.symbol == '@') {
+
     // マッチ成功 -> 次のノードに行く
-    if (str[(*seek)] == n.symbol) {
+    } else if (d_flag || l_flag || u_flag || s_flag || dot_flag || normal_flag) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       (*seek)++;
@@ -182,7 +194,7 @@ static int find_back_node(const MIN_REGEX_NODE* node, const MIN_REGEX_MATCH* mat
   int delta = 1;
   while (delta < step) {
     const MIN_REGEX_NODE back_node  = node[match[step-delta].node_index];
-    if (back_node.is_magick) break;
+    if (back_node.is_magick && ((back_node.symbol == '*') || (back_node.symbol == '(') || (back_node.symbol == ')'))) break;
     delta++;
   }
   return step - delta;
