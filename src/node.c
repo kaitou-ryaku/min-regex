@@ -153,6 +153,37 @@ static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{
       }
     }/*}}}*/
 
+    // -> (分岐なし) -> の括弧を削除
+    for (int paren=2; paren<node_size; paren++) {/*{{{*/
+      if (   ((node[paren].symbol  == '(') || (node[paren].symbol  == ')'))
+          && (node[paren].is_magick)
+          && (node[paren].in_snd  == -1)
+          && (node[paren].out_snd == -1)
+          && (node[paren].in_fst  != -1)
+      ) {
+
+        const int in  = node[paren].in_fst;
+        const int out = node[paren].out_fst;
+        if        ((node[in].out_fst == paren) && (node[out].in_fst == paren)) {
+          node[in ].out_fst = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_fst == paren) && (node[out].in_snd == paren)) {
+          node[in ].out_fst = out;
+          node[out].in_snd  = in;
+        } else if ((node[in].out_snd == paren) && (node[out].in_fst == paren)) {
+          node[in ].out_snd = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_snd == paren) && (node[out].in_snd == paren)) {
+          node[in ].out_snd = out;
+          node[out].in_snd  = in;
+        } else assert(0);
+
+        node[paren].in_fst  = -1;
+        node[paren].out_fst = -1;
+        is_changed = true;
+      }
+    }/*}}}*/
+
     // @削除により無用になった@*を削除
     for (int star=2; star<node_size; star++) {/*{{{*/
       if (   (node[star].symbol  == '*')
@@ -186,7 +217,6 @@ static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{
         is_changed = true;
       }
     }/*}}}*/
-
   }
 
 }/*}}}*/
