@@ -154,6 +154,39 @@ static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{
     }/*}}}*/
 
     // @削除により無用になった@*を削除
+    for (int star=2; star<node_size; star++) {/*{{{*/
+      if (   (node[star].symbol  == '*')
+          && (node[star].is_magick)
+          && (node[star].in_snd  == star)
+          && (node[star].out_snd == star)
+          && (node[star].in_snd != -1)
+      ) {
+
+        const int in  = node[star].in_fst;
+        const int out = node[star].out_fst;
+
+        if        ((node[in].out_fst == star) && (node[out].in_fst == star)) {
+          node[in ].out_fst = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_fst == star) && (node[out].in_snd == star)) {
+          node[in ].out_fst = out;
+          node[out].in_snd  = in;
+        } else if ((node[in].out_snd == star) && (node[out].in_fst == star)) {
+          node[in ].out_snd = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_snd == star) && (node[out].in_snd == star)) {
+          node[in ].out_snd = out;
+          node[out].in_snd  = in;
+        } else assert(0);
+
+        node[star].in_fst  = -1;
+        node[star].in_snd  = -1;
+        node[star].out_fst = -1;
+        node[star].out_snd = -1;
+        is_changed = true;
+      }
+    }/*}}}*/
+
   }
 
 }/*}}}*/

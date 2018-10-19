@@ -64,8 +64,8 @@ static void is_valid(const int line, const char* regex_str, const char* match_st
   }
   if (trial != answer) {
     fprintf(stderr, "LINE:%04d [\x1b[31mX\x1b[39m] \x1b[41m%15s       \"%s\"\x1b[49m", line, regex_str, match_str);
-    if (answer) fprintf(stderr, "  SHOULD BE MIN_REGEX_MATCH BUT RESULT IS UNMIN_REGEX_MATCH.\n");
-    else        fprintf(stderr, "  SHOULD BE UNMIN_REGEX_MATCH BUT RESULT IS MIN_REGEX_MATCH.\n");
+    if (answer) fprintf(stderr, "  SHOULD BE MATCH BUT RESULT IS MATCH.\n");
+    else        fprintf(stderr, "  SHOULD BE UNMATCH BUT RESULT IS MATCH.\n");
   }
 }/*}}}*/
 // partialチェック関数/*{{{*/
@@ -84,7 +84,6 @@ static void is_partial_valid(const int line, const char* regex_str, const char* 
 }/*}}}*/
 
 int main(void) {
-  is_valid(__LINE__, "((@|@)|(@|@))(a|a)"   , ""    , false);
   // 単純な正規表現を徹底的にチェック
   is_valid(__LINE__, ""             , ""    , false);/*{{{*/
   is_valid(__LINE__, "@"            , ""    , true );
@@ -2021,6 +2020,28 @@ int main(void) {
   is_partial_valid(__LINE__, "aa*"    , "aab"     , -1 ,'b','l');
   is_partial_valid(__LINE__, "aa*"    , "baa"     ,  1 ,'b','l');
   is_partial_valid(__LINE__, "aa*"    , "aba"     ,  2 ,'b','l');/*}}}*/
+
+  // 複雑なマッチ
+  is_valid(__LINE__, "((@|@)|(@|@))", ""    , true );/*{{{*/
+  is_valid(__LINE__, "((@|@)|(@|@))", "a"   , false);
+  is_valid(__LINE__, "((@|@)|(@|a))", ""    , true );
+  is_valid(__LINE__, "((@|@)|(@|a))", "a"   , true );
+  is_valid(__LINE__, "((@|@)|(a|a))", ""    , true );
+  is_valid(__LINE__, "((@|@)|(a|a))", "a"   , true );
+
+  is_valid(__LINE__, "a*"      , ""   , true );
+  is_valid(__LINE__, "a*"      , "a"  , true );
+  is_valid(__LINE__, "(a*)*"   , ""   , true );
+  is_valid(__LINE__, "(a*)*"   , "a"  , true );
+  is_valid(__LINE__, "((a*)*)*", ""   , true );
+  is_valid(__LINE__, "((a*)*)*", "a"  , true );
+
+  is_valid(__LINE__, "@*"      , ""   , true );
+  is_valid(__LINE__, "@*"      , "a"  , false);
+  is_valid(__LINE__, "(@*)*"   , ""   , true );
+  is_valid(__LINE__, "(@*)*"   , "a"  , false);
+  is_valid(__LINE__, "((@*)*)*", ""   , true );
+  is_valid(__LINE__, "((@*)*)*", "a"  , false);/*}}}*/
 
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;
