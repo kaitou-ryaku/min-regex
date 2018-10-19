@@ -107,7 +107,9 @@ static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{
         } else assert(0);
 
         node[atmark].in_fst  = -1;
+        node[atmark].in_snd  = -1;
         node[atmark].out_fst = -1;
+        node[atmark].out_snd = -1;
         is_changed = true;
       }
     }/*}}}*/
@@ -179,7 +181,9 @@ static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{
         } else assert(0);
 
         node[paren].in_fst  = -1;
+        node[paren].in_snd  = -1;
         node[paren].out_fst = -1;
+        node[paren].out_snd = -1;
         is_changed = true;
       }
     }/*}}}*/

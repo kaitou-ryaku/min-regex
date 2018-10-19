@@ -8,8 +8,10 @@ static void node_list_to_dot_inside( FILE *fp, const int graph_id, const MIN_REG
 /*}}}*/
 // 関数本体/*{{{*/
 static void node_list_to_dot_inside( FILE *fp, const int graph_id, const MIN_REGEX_NODE *node, const int* topic_node_list, const char* fontsize, const char* width, const char* topic_color, const char* boundary_color, const char* normal_color) {/*{{{*/
-  for (int i=0; i<node[0].total;i ++) {
+  for (int i=0; i<node[0].total;i++) {
     MIN_REGEX_NODE n = node[i];
+    if ((n.in_fst < 0) && (n.in_snd < 0) && (n.out_fst < 0) && (n.out_snd < 0)) continue;
+
     fprintf( fp, "  ");
     fprintf( fp, "%05d%05d [ "      , graph_id, i);
     if (n.symbol == '\\') {
