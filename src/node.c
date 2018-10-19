@@ -8,6 +8,7 @@
 #define __REGISTER_STATIC_FUNCTION__(x) do {if (strcmp(func_name, #x) == 0) return (void (*)(void)) x;} while(0)
 
 // 関数プロトタイプ/*{{{*/
+static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_empty);
 static void regex_to_node_list(
   const char*       regex_str
   , const int       regex_begin
@@ -67,8 +68,94 @@ extern int regex_to_all_node_arbitary(/*{{{*/
     node[i].total = node_empty;
   }
 
+  // 出入りが1つずつ無意味な空文字ノードを削除
+  delete_atmark_node(node, node_empty);
+
   // 作成されたノードの総数を返す
   return node_empty;
+}/*}}}*/
+static void delete_atmark_node(MIN_REGEX_NODE* node, const int node_size) {/*{{{*/
+  if (node_size <= 2) return;
+
+  bool is_changed = true;
+  while (is_changed) {
+    is_changed = false;
+
+    // -> @ -> の@を削除
+    for (int atmark=2; atmark<node_size; atmark++) {/*{{{*/
+      if (   (node[atmark].symbol  == '@')
+          && (node[atmark].is_magick)
+          && (node[atmark].in_snd  == -1)
+          && (node[atmark].out_snd == -1)
+          && (node[atmark].in_fst  != -1)
+      ) {
+
+        const int in  = node[atmark].in_fst;
+        const int out = node[atmark].out_fst;
+        if        ((node[in].out_fst == atmark) && (node[out].in_fst == atmark)) {
+          node[in ].out_fst = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_fst == atmark) && (node[out].in_snd == atmark)) {
+          node[in ].out_fst = out;
+          node[out].in_snd  = in;
+        } else if ((node[in].out_snd == atmark) && (node[out].in_fst == atmark)) {
+          node[in ].out_snd = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_snd == atmark) && (node[out].in_snd == atmark)) {
+          node[in ].out_snd = out;
+          node[out].in_snd  = in;
+        } else assert(0);
+
+        node[atmark].in_fst  = -1;
+        node[atmark].out_fst = -1;
+        is_changed = true;
+      }
+    }/*}}}*/
+
+    // @削除により無用になった(@|@)を削除
+    for (int lparen=2; lparen<node_size; lparen++) {/*{{{*/
+      if (   (node[lparen].symbol  == '(')
+          && (node[lparen].is_magick)
+          && (node[lparen].out_fst == node[lparen].out_snd)
+          && (node[lparen].out_fst != -1)
+      ) {
+
+        const int rparen = node[lparen].out_fst;
+        assert(node[rparen].symbol == ')');
+
+        const int in  = node[lparen].in_fst;
+        const int out = node[rparen].out_fst;
+        if        ((node[in].out_fst == lparen) && (node[out].in_fst == rparen)) {
+          node[in ].out_fst = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_fst == lparen) && (node[out].in_snd == rparen)) {
+          node[in ].out_fst = out;
+          node[out].in_snd  = in;
+        } else if ((node[in].out_snd == lparen) && (node[out].in_fst == rparen)) {
+          node[in ].out_snd = out;
+          node[out].in_fst  = in;
+        } else if ((node[in].out_snd == lparen) && (node[out].in_snd == rparen)) {
+          node[in ].out_snd = out;
+          node[out].in_snd  = in;
+        } else assert(0);
+
+        node[lparen].in_fst  = -1;
+        node[lparen].in_snd  = -1;
+        node[lparen].out_fst = -1;
+        node[lparen].out_snd = -1;
+
+        node[rparen].in_fst  = -1;
+        node[rparen].in_snd  = -1;
+        node[rparen].out_fst = -1;
+        node[rparen].out_snd = -1;
+        lparen++;
+        is_changed = true;
+      }
+    }/*}}}*/
+
+    // @削除により無用になった@*を削除
+  }
+
 }/*}}}*/
 extern int regex_to_all_node(/*{{{*/
   const char*       regex_str

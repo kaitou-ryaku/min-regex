@@ -84,6 +84,7 @@ static void is_partial_valid(const int line, const char* regex_str, const char* 
 }/*}}}*/
 
 int main(void) {
+  is_valid(__LINE__, "((@|@)|(@|@))(a|a)"   , ""    , false);
   // 単純な正規表現を徹底的にチェック
   is_valid(__LINE__, ""             , ""    , false);/*{{{*/
   is_valid(__LINE__, "@"            , ""    , true );
