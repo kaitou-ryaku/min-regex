@@ -119,7 +119,7 @@ static void match_str( const char* str, const int str_length, int* seek, const M
   const MIN_REGEX_NODE  n = node[m.node_index];
 
   // メタ文字のノードにいる場合、訪問方法が通常かバックトラックか考慮する
-  if (n.is_magick && ((n.symbol == '*') || (n.symbol == '(') || (n.symbol == ')') || (n.symbol == '^') || (n.symbol == '$') || (n.symbol == '@'))) {
+  if (n.is_magick && ((n.symbol == '*') || (n.symbol == '(') || (n.symbol == ')') || (n.symbol == '^') || (n.symbol == '$'))) {
     // 文字列が減らないまま再訪したかチェック
     bool revisit_without_decrease = false;
     for (int i=0; i<(*step)-1; i++) {
@@ -146,9 +146,6 @@ static void match_str( const char* str, const int str_length, int* seek, const M
 
     // グラフが$で、比較文字が文字が残ってない -> 終了
     } else if ((n.symbol == '$') && ((*seek) == str_length)) {
-      match[(*step)].str_index  = -1;
-      match[(*step)].str_index  = 1;
-      (*step)++;
 
     // 文字列が減らないまま再訪問                         -> バックトラック
     // バックトラックで訪問、fst のみ探索済みで、snd が空 -> 更にバックトラック
@@ -170,11 +167,8 @@ static void match_str( const char* str, const int str_length, int* seek, const M
     bool dot_flag    = (n.is_magick && n.symbol == '.' && (isgraph(str[(*seek)]) || str[(*seek)] == ' '));
     bool normal_flag = (!(n.is_magick) && str[(*seek)] == n.symbol);
 
-    // 空文字
-    if (n.is_magick && n.symbol == '@') {
-
     // マッチ成功 -> 次のノードに行く
-    } else if (d_flag || l_flag || u_flag || s_flag || dot_flag || normal_flag) {
+    if (d_flag || l_flag || u_flag || s_flag || dot_flag || normal_flag) {
       match[(*step)].str_index  = (*seek);
       (*step)++;
       (*seek)++;
