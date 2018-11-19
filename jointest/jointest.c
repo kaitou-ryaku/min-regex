@@ -2043,6 +2043,21 @@ int main(void) {
   is_valid(__LINE__, "((@*)*)*", ""   , true );
   is_valid(__LINE__, "((@*)*)*", "a"  , false);/*}}}*/
 
+  // 改行コード等{{{
+  is_valid(__LINE__, "a(b|\\s)*c", "a"    , false);
+  is_valid(__LINE__, "a(b|\\s)*c", "c"    , false);
+  is_valid(__LINE__, "a(b|\\s)*c", "ac"   , true );
+  is_valid(__LINE__, "a(b|\\s)*c", "abc"  , true );
+  is_valid(__LINE__, "a(b|\\s)*c", "a\nc" , true );
+  is_valid(__LINE__, "a(b|\\s)*c", "ad"   , false);
+
+  is_valid(__LINE__, "a(.|\\s)*c", "a"    , false);
+  is_valid(__LINE__, "a(.|\\s)*c", "c"    , false);
+  is_valid(__LINE__, "a(.|\\s)*c", "ac"   , true );
+  is_valid(__LINE__, "a(.|\\s)*c", "abc"  , true );
+  is_valid(__LINE__, "a(.|\\s)*c", "a\nc" , true );
+  is_valid(__LINE__, "a(.|\\s)*c", "ad"   , false);/*}}}*/
+
   fprintf(stderr, "STATISTICS: [%d/%d] ARE PASSED\n", correct, question);
   return 0;
 }
